@@ -34,3 +34,9 @@ Mainly geared to Volleyball
 - red-5V
 - gree-pin7
 
+
+## Links to be reviewed
+
+https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
+
+https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#:~:text=One%20of%20the%20greatest%20features,it%20and%20access%20web%20pages.
