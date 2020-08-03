@@ -1,8 +1,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-// gcc scoreboard.c -o runme ; ./runme
+// gcc scoreboard.c -o scoreboard ; ./scoreboard
 
 // C version to test ideas faster without loading on Arduino
 
@@ -16,21 +17,70 @@
 #define LED_ROWS 5
 #define LED_SIDES 2
 
-void set_count(int group, int value) {
 
+bool sideA = true;
+int scoreA = 0;
+int scoreB = 0;
+
+
+void usage(void) {
+    printf("options\n");
+    printf("  r - reset scores\n");
+    printf("  s - side-active change\n");
+    printf("  p - add to side-active score\n");
+    printf("  m - subtract to side-active score\n");
 }
 
 
-//loop
 
-
+void print_txt(void) {
+    printf("%s %02d  %02d %s\n", 
+        (sideA ? ">" : " "),
+        scoreA,
+        scoreB,
+        (sideA ? " " : "<")
+    );
+}
 
 //////////////////////////////////////////////////////
 // Main
 //////////////////////////////////////////////////////
 int main(void) {
-    int result;
+    bool running = true;
+    char c;
 
-    printf("AAAAAA\n");
-
+    while (running) {
+        printf("option: ");
+        c = getchar();
+        switch (c) {
+            case '?' :
+                usage();
+                break;
+            case 'q' :
+                running = false;
+                break;
+            case 'r': {
+                scoreA = 0;
+                scoreB = 0;
+                }
+                break;
+            case 's':
+                sideA = !sideA;
+                break;
+            case 'p':
+                if (sideA) { scoreA += 1; }
+                else       { scoreB += 1; }
+                break;
+            case 'm': {
+                if (sideA) { scoreA -= 1; }
+                else       { scoreB -= 1; }
+                if (scoreA < 0) { scoreA = 0; }
+                if (scoreB < 0) { scoreB = 0; }
+                }
+                break;
+        }
+        getchar();
+        print_txt();
+    }
+    return 0;
 }

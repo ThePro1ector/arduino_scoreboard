@@ -5,7 +5,7 @@
 
 
 ## Background
-Mainly geared to Volleyball
+Mainly geared to Volleyball, but should be useable for other socring.
 
 - using WS2812B led strip
 - arduino Uno
@@ -35,8 +35,27 @@ Mainly geared to Volleyball
 - gree-pin7
 
 
+## scoreboard.c
+
+This is a simple C program used to more quickly design code changes for the scoreboard.ino file.
+
+
+## scoreboard.ino
+
+This is the Arduino scetch code to operate the Arduino UNO
+
+
 ## Links to be reviewed
 
 https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
 
 https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#:~:text=One%20of%20the%20greatest%20features,it%20and%20access%20web%20pages.
+
+
+## TODO - C applicaiton
+
+- simple looping, with reset, sideout, plus, minus, and display in text
+- comment mapping for 150 led for a couple different directions
+- create dot matric digits
+- use dot matrix digits for counting
+- port to ino scetch and test
