@@ -5,11 +5,27 @@
 
 
 ## Background
-Mainly geared to Volleyball, but should be useable for other socring.
+This project is geared to Volleyball, but should be useable for other scoring.  The basic idea is drive a string of LEDs wrapped around a board to form a grid, and drive that with and Arduino and a few buttons to create a scoreboard.
 
-- using WS2812B led strip
-- arduino Uno
+Unlike some of the other Arduino based scoreboards, there should be very little physical construction, soldering etc.
 
+The first design will be using a full Arduino UNO and bread as a proof of concept.  Other designs will refine the system, like using a simple Arduino adaptor board to solder buttons, and then move to a less expensive ESP32 (vs UNO) that has more memory, wireless, and bluetooth.  Wireless and bluetooth will be used for experimenting with user configurations.
+
+All designs will user the WS2812B LED string, that has individually addressable LEDs and is well supported with the Arduino FastLED library.
+
+Prior to any of the hardware designs, we will create a simple C code simulator that should allow faster prototyping of firmware.
+
+
+## C code Simulator
+
+## Arduino UNO with breadboard
+
+## Arduino UNO and Adaptor
+
+## ESP32 with breadboard
+
+
+## Rough Notes Below
 
 - input buttons
     - on/off
@@ -35,17 +51,17 @@ Mainly geared to Volleyball, but should be useable for other socring.
 - gree-pin7
 
 
-## scoreboard.c
+### scoreboard.c
 
 This is a simple C program used to more quickly design code changes for the scoreboard.ino file.
 
 
-## scoreboard.ino
+### scoreboard.ino
 
 This is the Arduino scetch code to operate the Arduino UNO
 
 
-## Links to be reviewed
+### Links to be reviewed
 
 https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
 
