@@ -28,7 +28,7 @@ Prior to any of the hardware designs, we will create a simple C code simulator t
 ## Rough Notes Below
 
 - input buttons
-    - on/off
+    - on/off (on power)
     - clear all
     - side
     - add
