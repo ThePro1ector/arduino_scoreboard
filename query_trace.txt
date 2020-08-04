@@ -1,0 +1,52 @@
+
+Query Trace
+
+- basically mange running custom tcpdump on selected servers and consolidating the traces
+- user sets
+    - client ip to search
+    - duration of each trace (option to tcpdump)
+    - max packets of each trace (option to 'time' command around tcpdump)
+
+- history
+- whole thing was Jons task
+- to off load, I took over front end
+- to off load, I took over back end
+- I interpreted feature to need more responsive monitoring
+- designed using isolated threads (threads only ran within query trace code)
+- bacup design with FutureTasks
+- FutureTasks use DNS Manager Scheduler, and ulimately the system cron
+- cron is limited to 1 minute fastest
+- cron spins off new process
+- some sort of fuzzy details
+    - DNS Scheduler implments pool of sub-processes (currently up to 3, with 8 threads)
+    - the defunct/zombie bug exposes limit of DNS Scheduler
+    - Future Tasks are run as "multi*" vs SERIAL (used for blacklists)
+- Jon felt less comfortable with Threads and prefered FutureTask so switched
+- Have been running into race conditions
+- Tried to use flags based on database flags
+- I think there might be issues there, but 100% sure 
+- Tried database based lock but that didn't work
+- Tried mkdir based lock and that seemed to fix sorting CSV
+- latest thing is tracking down why '_any_pending' function returns false BEFORE and FutureTasks run
+
+
+- been able to run lots of testing with a automated frame work based on Node/Puppeteer
+- framework is rough
+- need to commit latest with some notes
+- haven't pushed using it because Jon doesn't want a time sinkhole
+
+
+
+
+
+- front end
+    - html
+    - css
+    - javascript
+    - hooks to global javascript
+    - fronend hase been straight forward
+    
+- python back end
+    - hooks to DNS Scheduler for Future Tasks
+    - might be able to do this cleaner??
+
