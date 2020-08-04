@@ -1,6 +1,12 @@
 
 // this will be code
 
-//setup
+#define INO_APP
 
-//loop
+void setup() {
+
+}
+
+void loop() {
+
+}
