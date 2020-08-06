@@ -15,14 +15,10 @@
 // - set counts A,B and (if double sided) C,D to "00 00"
 // - set count A brigher indicating side (serving)
 
-#define LEDS_PER_ROW 15
-#define LED_ROWS 5
-#define LED_SIDES 2
-
 #define TOP_RIGHT 0
-#define COLS (2*15)
-#define ROWS 5
-#define SIDES 2
+#define COLS (2*30)
+#define ROWS 9
+#define SIDES 1
 #define DIGIT_WIDTH 3
 #define DIGIT_GAP 0
 #define SCORE_GAP 3
@@ -51,6 +47,8 @@ int digitF[ROWS][DIGIT_WIDTH];
 int digitG[ROWS][DIGIT_WIDTH];
 int digitH[ROWS][DIGIT_WIDTH];
 #endif
+
+
 
 
 #ifdef C_APP
@@ -281,6 +279,82 @@ void setupDigitLeds() {
 }
 
 
+
+void setSegments(int digit[ROWS][DIGIT_WIDTH], int seg1, int seg2, int seg3, int seg4, int seg5, int seg6, int seg7) {
+    int i, temp;
+    //printf("%d %d %d %d %d %d %d\n", seg1, seg2, seg3, seg4, seg5, seg6, seg7);
+    clearDigit(digit, 0);
+    if (seg1) {
+        for (i=0; i<DIGIT_WIDTH; i++) digit[0][i] = 1;
+    }
+    if (seg2) {
+        temp = (ROWS-1)/2;
+        for (i=0; i<temp; i++) digit[i][DIGIT_WIDTH-1] = 1;
+    }
+    if (seg3) {
+        temp = (ROWS-1)/2;
+        for (i=temp; i<ROWS; i++) digit[i][DIGIT_WIDTH-1] = 1;
+    }
+    if (seg4) {
+        temp = (ROWS-1);
+        for (i=0; i<DIGIT_WIDTH; i++) digit[temp][i] = 1;
+    }
+    if (seg5) {
+        temp = (ROWS-1)/2;
+        for (i=temp; i<ROWS; i++) digit[i][0] = 1;
+    }
+    if (seg6) {
+        temp = (ROWS-1)/2;
+        for (i=0; i<temp; i++) digit[i][0] = 1;
+    }
+    if (seg7) {
+        temp = (ROWS-1)/2;
+        for (i=0; i<DIGIT_WIDTH; i++) digit[temp][i] = 1;
+    }
+}
+
+//          seg1
+//     seg6     seg2
+//          seg7
+//     seg5     seg3
+//          seg4
+void setDigit(int digit[ROWS][DIGIT_WIDTH], int val) {
+    switch (val) {
+        case 0: setSegments(digit, 1,1,1,1,1,1,0); break;
+        case 1: setSegments(digit, 0,1,1,0,0,0,0); break;
+        case 2: setSegments(digit, 1,1,0,1,1,0,1); break;
+        case 3: setSegments(digit, 1,1,1,1,0,0,1); break;
+        case 4: setSegments(digit, 0,1,1,0,0,1,1); break;
+        case 5: setSegments(digit, 1,0,1,1,0,1,1); break;
+        case 6: setSegments(digit, 1,0,1,1,1,1,1); break;
+        case 7: setSegments(digit, 1,1,1,0,0,0,0); break;
+        case 8: setSegments(digit, 1,1,1,1,1,1,1); break;
+        case 9: setSegments(digit, 1,1,1,1,0,1,1); break;
+    }
+}
+
+void setDigitsFromScore() {
+    int nibble;
+    nibble = scoreA/10;
+    setDigit(digitA, nibble);
+    nibble = scoreA%10;
+    setDigit(digitB, nibble);
+    nibble = scoreB/10;
+    setDigit(digitC, nibble);
+    nibble = scoreB%10;
+    setDigit(digitD, nibble);
+#if SIDES == 2
+    nibble = scoreA/10;
+    setDigit(digitE, nibble);
+    nibble = scoreA%10;
+    setDigit(digitF, nibble);
+    nibble = scoreB/10;
+    setDigit(digitG, nibble);
+    nibble = scoreB%10;
+    setDigit(digitH, nibble);
+#endif
+}
+
 #ifdef C_APP
 
 void print_table() {
@@ -405,7 +479,8 @@ void print_table() {
 void dumpDigitLine(int digit[ROWS][DIGIT_WIDTH], int row, char *post) {
     int col;
     for (col=0; col < DIGIT_WIDTH; col++) {
-        printf("%3d ", digit[row][col]);
+        if (digit[row][col]) printf("%3s ", "X");
+        else                 printf("%3s ", " ");
     } 
     printf("%s", post);
 }
@@ -507,6 +582,7 @@ void loop() {
     clr_op();
 #ifdef C_APP
     print_txt();
+    setDigitsFromScore();
     dumpDigits();
 #endif //C_APP
 }
@@ -523,3 +599,9 @@ int main(void) {
     }
     return 0;
 }
+
+
+// TODO:
+// - set leds from digits/scores
+// - can we generate code to drop in .ino from .c?
+
