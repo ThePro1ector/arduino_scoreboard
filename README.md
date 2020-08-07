@@ -18,6 +18,11 @@ Prior to any of the hardware designs, we will create a simple C code simulator t
 
 ## C code Simulator
 
+- faster to code and test ideas
+- main loop for c app
+- code with setup() and loop() that can be ported to arduino .ino file
+
+
 ## Arduino UNO with breadboard
 
 ## Arduino UNO and Adaptor

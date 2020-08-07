@@ -7,8 +7,8 @@
 
 // C version to test ideas faster without loading on Arduino
 
-#define C_APP
-//#define INO_APP
+#define SIMULUATION
+
 
 //setup
 // - turn all leds off
@@ -23,12 +23,27 @@
 #define DIGIT_GAP 0
 #define SCORE_GAP 3
 
+#define DIGITA  0
+#define DIGITB  1
+#define DIGITC  2
+#define DIGITD  3
+#define DIGITE  4
+#define DIGITF  5
+#define DIGITG  6
+#define DIGITH  7
+
+
+
+int ledReferenceTable[ROWS][COLS];
+
+bool running = true;
+int operation = ' ';
+
 bool sideA = true;
 int scoreA = 0;
 int scoreB = 0;
-int op = ' ';
-bool running = true;
-int table[ROWS][COLS];
+
+
 int digitLedsA[ROWS][DIGIT_WIDTH];
 int digitLedsB[ROWS][DIGIT_WIDTH];
 int digitLedsC[ROWS][DIGIT_WIDTH];
@@ -50,8 +65,6 @@ int digitH[ROWS][DIGIT_WIDTH];
 
 
 
-
-#ifdef C_APP
 void usage() {
     printf("options\n");
     printf("  r - reset scores\n");
@@ -59,20 +72,171 @@ void usage() {
     printf("  p - add to side-active score\n");
     printf("  m - subtract to side-active score\n");
 }
-#endif
 
-void get_op() {
-#ifdef C_APP
+void printLedTableReference() {
+    int i, side, cols, col, row, index;
+
+    // verify columns
+    cols = SIDES * (4*DIGIT_WIDTH + 2*DIGIT_GAP + SCORE_GAP);
+    if (cols != COLS) {
+        printf("WARNING: estimated col (%d) != COL (%d)\n", cols, COLS);
+    }
+
+#if TOP_RIGHT == 1
+    // start top,left
+    printf("int ledReferenceTable[%d][%d] = [\n", ROWS, COLS);
+    index = 0;
+    for (row = 0; row < ROWS; row++) {
+        col = 0;
+        printf("  [ ");
+        for (side = 0; side < SIDES; side++) {
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d, ", index);
+                col++;
+                index++;
+            }
+            for (i=0; i<DIGIT_GAP; i++) {
+                printf(" ");
+                col++;
+                index++;
+            }
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d, ", index);
+                col++;
+                index++;
+            }
+            for (i=0; i<SCORE_GAP; i++) {
+                printf(" ");
+                col++;
+                index++;
+           }
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d, ", index);
+                col++;
+                index++;
+            }
+            for (i=0; i<DIGIT_GAP; i++) {
+                printf(" ");
+                col++;
+                index++;
+            }
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d", index);
+                if ((col+1) < COLS) printf(", ");
+                else                  printf(" ");
+                col++;
+                index++;
+            }
+            if ((side+1) < SIDES) printf("     ");
+        }
+        printf("]");
+        if ((row+1) < ROWS) printf(",");
+        printf("\n");
+    }
+    printf("];\n");
+#endif // TOP_RIGHT=1
+
+
+#if TOP_RIGHT == 0
+    // start bottom,right
+    printf("int ledReferenceTable[%d][%d] = [\n", ROWS, COLS);
+    index = (ROWS * COLS) -1;
+    for (row = 0; row < ROWS; row++) {
+        col = 0;
+        printf("  [ ");
+        for (side = 0; side < SIDES; side++) {
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d, ", index);
+                col++;
+                index--;
+            }
+            for (i=0; i<DIGIT_GAP; i++) {
+                printf(" ");
+                col++;
+                index--;
+            }
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d, ", index);
+                col++;
+                index--;
+            }
+            for (i=0; i<SCORE_GAP; i++) {
+                printf(" ");
+                col++;
+                index--;
+           }
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d, ", index);
+                col++;
+                index--;
+            }
+            for (i=0; i<DIGIT_GAP; i++) {
+                printf(" ");
+                col++;
+                index--;
+            }
+            for (i=0; i<DIGIT_WIDTH; i++) {
+                printf("%03d", index);
+                if ((col+1) < COLS) printf(", ");
+                else                  printf(" ");
+                col++;
+                index--;
+            }
+            if ((side+1) < SIDES) printf("     ");
+        }
+        printf("]");
+        if ((row+1) < ROWS) printf(",");
+        printf("\n");
+    }
+    printf("];\n");
+#endif // TOP_RIGHT=1
+}
+
+void dumpText() {
+    printf("%s %02d  %02d %s\n", 
+        (sideA ? ">" : " "),
+        scoreA,
+        scoreB,
+        (sideA ? " " : "<")
+    );
+}
+
+
+
+
+
+
+
+void getOperation() {
     printf("option: ");
-    op = getchar();
-#endif
+    operation = getchar();
 }
 
-void clr_op() {
-#ifdef C_APP
+void clearOperation() {
     getchar();
-#endif
 }
+
+void scoreReset() {
+    scoreA = 0;
+    scoreB = 0;
+}
+
+void scoreSideToggle() {
+    sideA = !sideA;
+}
+
+void scorePlus() {
+    if (sideA) { scoreA += 1; }
+    else       { scoreB += 1; }
+}
+
+void scoreMinus() {
+    if (sideA) { scoreA -= 1; }
+    else       { scoreB -= 1; }
+    if (scoreA < 0) { scoreA = 0; }
+    if (scoreB < 0) { scoreB = 0; }
+}
+
 
 void clearDigit(int digit[ROWS][DIGIT_WIDTH], int val) {
     int i,j;
@@ -320,21 +484,25 @@ void setSegments(int digit[ROWS][DIGIT_WIDTH], int seg1, int seg2, int seg3, int
 //          seg4
 void setDigit(int digit[ROWS][DIGIT_WIDTH], int val) {
     switch (val) {
-        case 0: setSegments(digit, 1,1,1,1,1,1,0); break;
-        case 1: setSegments(digit, 0,1,1,0,0,0,0); break;
-        case 2: setSegments(digit, 1,1,0,1,1,0,1); break;
-        case 3: setSegments(digit, 1,1,1,1,0,0,1); break;
-        case 4: setSegments(digit, 0,1,1,0,0,1,1); break;
-        case 5: setSegments(digit, 1,0,1,1,0,1,1); break;
-        case 6: setSegments(digit, 1,0,1,1,1,1,1); break;
-        case 7: setSegments(digit, 1,1,1,0,0,0,0); break;
-        case 8: setSegments(digit, 1,1,1,1,1,1,1); break;
-        case 9: setSegments(digit, 1,1,1,1,0,1,1); break;
+        case -1: clearDigit(digit, 0);              break;
+        case  0: setSegments(digit, 1,1,1,1,1,1,0); break;
+        case  1: setSegments(digit, 0,1,1,0,0,0,0); break;
+        case  2: setSegments(digit, 1,1,0,1,1,0,1); break;
+        case  3: setSegments(digit, 1,1,1,1,0,0,1); break;
+        case  4: setSegments(digit, 0,1,1,0,0,1,1); break;
+        case  5: setSegments(digit, 1,0,1,1,0,1,1); break;
+        case  6: setSegments(digit, 1,0,1,1,1,1,1); break;
+        case  7: setSegments(digit, 1,1,1,0,0,0,0); break;
+        case  8: setSegments(digit, 1,1,1,1,1,1,1); break;
+        case  9: setSegments(digit, 1,1,1,1,0,1,1); break;
     }
 }
 
-void setDigitsFromScore() {
+void setDigits() {
     int nibble;
+
+    dumpText();
+
     nibble = scoreA/10;
     setDigit(digitA, nibble);
     nibble = scoreA%10;
@@ -355,126 +523,7 @@ void setDigitsFromScore() {
 #endif
 }
 
-#ifdef C_APP
 
-void print_table() {
-    int i, side, cols, col, row, index;
-
-    // verify columns
-    cols = SIDES * (4*DIGIT_WIDTH + 2*DIGIT_GAP + SCORE_GAP);
-    if (cols != COLS) {
-        printf("WARNING: estimated col (%d) != COL (%d)\n", cols, COLS);
-    }
-
-#if TOP_RIGHT == 1
-    // start top,left
-    printf("int table[%d][%d] = [\n", ROWS, COLS);
-    index = 0;
-    for (row = 0; row < ROWS; row++) {
-        col = 0;
-        printf("  [ ");
-        for (side = 0; side < SIDES; side++) {
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<SCORE_GAP; i++) {
-                printf(" ");
-                col++;
-                index++;
-           }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d", index);
-                if ((col+1) < COLS) printf(", ");
-                else                  printf(" ");
-                col++;
-                index++;
-            }
-            if ((side+1) < SIDES) printf("     ");
-        }
-        printf("]");
-        if ((row+1) < ROWS) printf(",");
-        printf("\n");
-    }
-    printf("];\n");
-#endif // TOP_RIGHT=1
-
-
-#if TOP_RIGHT == 0
-    // start bottom,right
-    printf("int table[%d][%d] = [\n", ROWS, COLS);
-    index = (ROWS * COLS) -1;
-    for (row = 0; row < ROWS; row++) {
-        col = 0;
-        printf("  [ ");
-        for (side = 0; side < SIDES; side++) {
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<SCORE_GAP; i++) {
-                printf(" ");
-                col++;
-                index--;
-           }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d", index);
-                if ((col+1) < COLS) printf(", ");
-                else                  printf(" ");
-                col++;
-                index--;
-            }
-            if ((side+1) < SIDES) printf("     ");
-        }
-        printf("]");
-        if ((row+1) < ROWS) printf(",");
-        printf("\n");
-    }
-    printf("];\n");
-#endif // TOP_RIGHT=1
-}
 
 void dumpDigitLine(int digit[ROWS][DIGIT_WIDTH], int row, char *post) {
     int col;
@@ -526,19 +575,44 @@ void dumpDigits() {
 }
 
 
-void print_txt() {
-    printf("%s %02d  %02d %s\n", 
-        (sideA ? ">" : " "),
-        scoreA,
-        scoreB,
-        (sideA ? " " : "<")
-    );
+void testSeq() {
+    // setup
+    clearDigits();
+    clearDigitLeds();
+    setupDigitLeds();
+
+    setDigits();
+    dumpDigits();
+
+    scorePlus();
+    setDigits();
+    dumpDigits();
+
+    scorePlus();
+    setDigits();
+    dumpDigits();
+
+    scoreSideToggle();
+    scorePlus();
+    setDigits();
+    dumpDigits();
+
+    scoreMinus();
+    setDigits();
+    dumpDigits();
+
+    scoreReset();
+    setDigits();
+    dumpDigits();
 }
 
-#endif // C_APP
 
 
 
+
+////////////////////////////////////////////////////////////////////////////////
+// setup
+////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
     clearDigits();
@@ -546,54 +620,41 @@ void setup() {
     setupDigitLeds();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// loop
+////////////////////////////////////////////////////////////////////////////////
 void loop() {
-    get_op();
-    switch (op) {
-        case 'r':
-            scoreA = 0;
-            scoreB = 0;
-            break;
-        case 's':
-            sideA = !sideA;
-            break;
-        case 'p':
-            if (sideA) { scoreA += 1; }
-            else       { scoreB += 1; }
-            break;
-        case 'm':
-            if (sideA) { scoreA -= 1; }
-            else       { scoreB -= 1; }
-            if (scoreA < 0) { scoreA = 0; }
-            if (scoreB < 0) { scoreB = 0; }
-#ifdef C_APP
+    getOperation();
+    switch (operation) {
+        case 'r': scoreReset(); break;
+        case 's': scoreSideToggle(); break;
+        case 'p': scorePlus(); break;
+        case 'm': scoreMinus(); break;
         case '?' :
-        case 'h' :
-            usage();
-            break;
-        case 'q' :
-            running = false;
-            break;
+        case 'h' : usage(); break;
+        case 'q' : running = false; break;
         case 't':
-            print_table();
+            printLedTableReference();
             dumpDigitLeds();
             break;
-#endif //C_APP
     }
-    clr_op();
-#ifdef C_APP
-    print_txt();
-    setDigitsFromScore();
+    clearOperation();
+    dumpText();
+    setDigits();
     dumpDigits();
-#endif //C_APP
 }
 
-//////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // Main
-//////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 int main(void) {
 
-    setup();
+    testSeq();
 
+    setup();
     while (running) {
         loop();
     }
