@@ -7,22 +7,29 @@
 
 // C version to test ideas faster without loading on Arduino
 
-#define SIMULUATION
 
+#define SIMULATION
+#define SCORE_PRINT
+#define REFERENCE_TABLE
+#define TEST_SEQUENCE
 
-//setup
-// - turn all leds off
-// - set counts A,B and (if double sided) C,D to "00 00"
-// - set count A brigher indicating side (serving)
 
 #define TOP_RIGHT 0
-#define COLS (2*30)
-#define ROWS 9
-#define SIDES 1
+#define COLS (2*15)
+#define ROWS 5
+#define SIDES 2
 #define DIGIT_WIDTH 3
 #define DIGIT_GAP 0
 #define SCORE_GAP 3
 
+#if SIDES == 1
+#define DIGITA  0
+#define DIGITB  1
+#define DIGITC  2
+#define DIGITD  3
+#define DIGITS  4
+#endif
+#if SIDES == 2
 #define DIGITA  0
 #define DIGITB  1
 #define DIGITC  2
@@ -31,37 +38,37 @@
 #define DIGITF  5
 #define DIGITG  6
 #define DIGITH  7
+#define DIGITS  8
+#endif
 
 
 
-int ledReferenceTable[ROWS][COLS];
 
-bool running = true;
 int operation = ' ';
-
 bool sideA = true;
 int scoreA = 0;
 int scoreB = 0;
 
 
-int digitLedsA[ROWS][DIGIT_WIDTH];
-int digitLedsB[ROWS][DIGIT_WIDTH];
-int digitLedsC[ROWS][DIGIT_WIDTH];
-int digitLedsD[ROWS][DIGIT_WIDTH];
-int digitA[ROWS][DIGIT_WIDTH];
-int digitB[ROWS][DIGIT_WIDTH];
-int digitC[ROWS][DIGIT_WIDTH];
-int digitD[ROWS][DIGIT_WIDTH];
-#if SIDES == 2
-int digitLedsE[ROWS][DIGIT_WIDTH];
-int digitLedsF[ROWS][DIGIT_WIDTH];
-int digitLedsG[ROWS][DIGIT_WIDTH];
-int digitLedsH[ROWS][DIGIT_WIDTH];
-int digitE[ROWS][DIGIT_WIDTH];
-int digitF[ROWS][DIGIT_WIDTH];
-int digitG[ROWS][DIGIT_WIDTH];
-int digitH[ROWS][DIGIT_WIDTH];
-#endif
+int digitLeds[DIGITS][ROWS][DIGIT_WIDTH];
+
+// TODO really should test by setting led in expected position and translating that to a simulated set 
+// of 'wrapped' leds
+// remove this
+int digits[DIGITS][ROWS][DIGIT_WIDTH];
+// use 
+// int ledStrip[ROWS*COLS];
+// void dumpLedStripAsTable() {
+//     int row, col, index;
+
+//     for (row = 0; row < ROWS; row ++) {
+//         for (col = 0; col < COLS; col ++) {
+            
+//         }
+//         printf("\n");
+//     }
+// }
+
 
 
 
@@ -73,6 +80,8 @@ void usage() {
     printf("  m - subtract to side-active score\n");
 }
 
+#ifdef REFERENCE_TABLE
+int ledReferenceTable[ROWS][COLS];
 void printLedTableReference() {
     int i, side, cols, col, row, index;
 
@@ -191,87 +200,7 @@ void printLedTableReference() {
     printf("];\n");
 #endif // TOP_RIGHT=1
 }
-
-void dumpText() {
-    printf("%s %02d  %02d %s\n", 
-        (sideA ? ">" : " "),
-        scoreA,
-        scoreB,
-        (sideA ? " " : "<")
-    );
-}
-
-
-
-
-
-
-
-void getOperation() {
-    printf("option: ");
-    operation = getchar();
-}
-
-void clearOperation() {
-    getchar();
-}
-
-void scoreReset() {
-    scoreA = 0;
-    scoreB = 0;
-}
-
-void scoreSideToggle() {
-    sideA = !sideA;
-}
-
-void scorePlus() {
-    if (sideA) { scoreA += 1; }
-    else       { scoreB += 1; }
-}
-
-void scoreMinus() {
-    if (sideA) { scoreA -= 1; }
-    else       { scoreB -= 1; }
-    if (scoreA < 0) { scoreA = 0; }
-    if (scoreB < 0) { scoreB = 0; }
-}
-
-
-void clearDigit(int digit[ROWS][DIGIT_WIDTH], int val) {
-    int i,j;
-    for (i=0; i < ROWS; i++) {
-        for (j=0; j < DIGIT_WIDTH; j++) {
-            digit[i][j] = val;
-        }     
-    }
-}
-
-void clearDigitLeds() {
-    clearDigit(digitLedsA, -1);
-    clearDigit(digitLedsB, -1);
-    clearDigit(digitLedsC, -1);
-    clearDigit(digitLedsD, -1);
-#if SIDES == 2
-    clearDigit(digitLedsE, -1);
-    clearDigit(digitLedsF, -1);
-    clearDigit(digitLedsG, -1);
-    clearDigit(digitLedsH, -1);
-#endif
-}
-
-void clearDigits() {
-    clearDigit(digitA, 0);
-    clearDigit(digitB, 0);
-    clearDigit(digitC, 0);
-    clearDigit(digitD, 0);
-#if SIDES == 2
-    clearDigit(digitE, 0);
-    clearDigit(digitF, 0);
-    clearDigit(digitG, 0);
-    clearDigit(digitH, 0);
-#endif //SIDES == 2
-}
+#endif // REFERENCE_TABLE
 
 void setupDigitLeds() {
     int i, side, cols, col, row, index;
@@ -368,7 +297,7 @@ void setupDigitLeds() {
         for (side = 0; side < SIDES; side++) {
             if (side == 0) {
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsA[row][i] = index;
+                    digitLeds[DIGITA][row][i] = index;
                     col++;
                     index--;
                 }
@@ -377,7 +306,7 @@ void setupDigitLeds() {
                     index--;
                 }
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsB[row][i] = index;
+                    digitLeds[DIGITB][row][i] = index;
                     col++;
                     index--;
                 }
@@ -386,7 +315,7 @@ void setupDigitLeds() {
                     index--;
             }
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsC[row][i] = index;
+                    digitLeds[DIGITC][row][i] = index;
                     col++;
                     index--;
                 }
@@ -395,7 +324,7 @@ void setupDigitLeds() {
                     index--;
                 }
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsD[row][i] = index;
+                    digitLeds[DIGITD][row][i] = index;
                     col++;
                     index--;
                 }
@@ -403,7 +332,7 @@ void setupDigitLeds() {
 #if SIDES == 2
             if (side == 1) {
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsE[row][i] = index;
+                    digitLeds[DIGITE][row][i] = index;
                     col++;
                     index--;
                 }
@@ -412,7 +341,7 @@ void setupDigitLeds() {
                     index--;
                 }
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsF[row][i] = index;
+                    digitLeds[DIGITF][row][i] = index;
                     col++;
                     index--;
                 }
@@ -421,7 +350,7 @@ void setupDigitLeds() {
                     index--;
                 }
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsG[row][i] = index;
+                    digitLeds[DIGITG][row][i] = index;
                     col++;
                     index--;
                 }
@@ -430,7 +359,7 @@ void setupDigitLeds() {
                     index--;
                 }
                 for (i=0; i<DIGIT_WIDTH; i++) {
-                    digitLedsH[row][i] = index;
+                    digitLeds[DIGITH][row][i] = index;
                     col++;
                     index--;
                 }
@@ -444,36 +373,106 @@ void setupDigitLeds() {
 
 
 
-void setSegments(int digit[ROWS][DIGIT_WIDTH], int seg1, int seg2, int seg3, int seg4, int seg5, int seg6, int seg7) {
+
+
+
+void getOperation() {
+    printf("option: ");
+    operation = getchar();
+}
+
+void clearOperation() {
+    getchar();
+}
+
+void scoreReset() {
+    scoreA = 0;
+    scoreB = 0;
+}
+
+void scoreSideToggle() {
+    sideA = !sideA;
+}
+
+void scorePlus() {
+    if (sideA) { scoreA += 1; }
+    else       { scoreB += 1; }
+}
+
+void scoreMinus() {
+    if (sideA) { scoreA -= 1; }
+    else       { scoreB -= 1; }
+    if (scoreA < 0) { scoreA = 0; }
+    if (scoreB < 0) { scoreB = 0; }
+}
+
+void clearDigit(int digitNum, int val) {
+    int i,j;
+    for (i=0; i < ROWS; i++) {
+        for (j=0; j < DIGIT_WIDTH; j++) {
+            digits[digitNum][i][j] = val;
+        }     
+    }
+}
+
+void clearDigitLeds() {
+    clearDigit(DIGITA, -1);
+    clearDigit(DIGITB, -1);
+    clearDigit(DIGITC, -1);
+    clearDigit(DIGITD, -1);
+#if SIDES == 2
+    clearDigit(DIGITE, -1);
+    clearDigit(DIGITF, -1);
+    clearDigit(DIGITG, -1);
+    clearDigit(DIGITH, -1);
+#endif
+}
+
+void clearDigits() {
+    clearDigit(DIGITA, 0);
+    clearDigit(DIGITB, 0);
+    clearDigit(DIGITC, 0);
+    clearDigit(DIGITD, 0);
+#if SIDES == 2
+    clearDigit(DIGITE, 0);
+    clearDigit(DIGITF, 0);
+    clearDigit(DIGITG, 0);
+    clearDigit(DIGITH, 0);
+#endif
+}
+
+
+
+void setSegments(int digitNum, int seg1, int seg2, int seg3, int seg4, int seg5, int seg6, int seg7) {
     int i, temp;
     //printf("%d %d %d %d %d %d %d\n", seg1, seg2, seg3, seg4, seg5, seg6, seg7);
-    clearDigit(digit, 0);
+    clearDigit(digitNum, 0);
     if (seg1) {
-        for (i=0; i<DIGIT_WIDTH; i++) digit[0][i] = 1;
+        for (i=0; i<DIGIT_WIDTH; i++) digits[digitNum][0][i] = 1;
     }
     if (seg2) {
         temp = (ROWS-1)/2;
-        for (i=0; i<temp; i++) digit[i][DIGIT_WIDTH-1] = 1;
+        for (i=0; i<temp; i++) digits[digitNum][i][DIGIT_WIDTH-1] = 1;
     }
     if (seg3) {
         temp = (ROWS-1)/2;
-        for (i=temp; i<ROWS; i++) digit[i][DIGIT_WIDTH-1] = 1;
+        for (i=temp; i<ROWS; i++) digits[digitNum][i][DIGIT_WIDTH-1] = 1;
     }
     if (seg4) {
         temp = (ROWS-1);
-        for (i=0; i<DIGIT_WIDTH; i++) digit[temp][i] = 1;
+        for (i=0; i<DIGIT_WIDTH; i++) digits[digitNum][temp][i] = 1;
     }
     if (seg5) {
         temp = (ROWS-1)/2;
-        for (i=temp; i<ROWS; i++) digit[i][0] = 1;
+        for (i=temp; i<ROWS; i++) digits[digitNum][i][0] = 1;
     }
     if (seg6) {
         temp = (ROWS-1)/2;
-        for (i=0; i<temp; i++) digit[i][0] = 1;
+        for (i=0; i<temp; i++) digits[digitNum][i][0] = 1;
     }
     if (seg7) {
         temp = (ROWS-1)/2;
-        for (i=0; i<DIGIT_WIDTH; i++) digit[temp][i] = 1;
+        for (i=0; i<DIGIT_WIDTH; i++) digits[digitNum][temp][i] = 1;
     }
 }
 
@@ -482,53 +481,60 @@ void setSegments(int digit[ROWS][DIGIT_WIDTH], int seg1, int seg2, int seg3, int
 //          seg7
 //     seg5     seg3
 //          seg4
-void setDigit(int digit[ROWS][DIGIT_WIDTH], int val) {
+void setDigit(int digitNum, int val) {
     switch (val) {
-        case -1: clearDigit(digit, 0);              break;
-        case  0: setSegments(digit, 1,1,1,1,1,1,0); break;
-        case  1: setSegments(digit, 0,1,1,0,0,0,0); break;
-        case  2: setSegments(digit, 1,1,0,1,1,0,1); break;
-        case  3: setSegments(digit, 1,1,1,1,0,0,1); break;
-        case  4: setSegments(digit, 0,1,1,0,0,1,1); break;
-        case  5: setSegments(digit, 1,0,1,1,0,1,1); break;
-        case  6: setSegments(digit, 1,0,1,1,1,1,1); break;
-        case  7: setSegments(digit, 1,1,1,0,0,0,0); break;
-        case  8: setSegments(digit, 1,1,1,1,1,1,1); break;
-        case  9: setSegments(digit, 1,1,1,1,0,1,1); break;
+        case -1: clearDigit(digitNum, 0);              break;
+        case  0: setSegments(digitNum, 1,1,1,1,1,1,0); break;
+        case  1: setSegments(digitNum, 0,1,1,0,0,0,0); break;
+        case  2: setSegments(digitNum, 1,1,0,1,1,0,1); break;
+        case  3: setSegments(digitNum, 1,1,1,1,0,0,1); break;
+        case  4: setSegments(digitNum, 0,1,1,0,0,1,1); break;
+        case  5: setSegments(digitNum, 1,0,1,1,0,1,1); break;
+        case  6: setSegments(digitNum, 1,0,1,1,1,1,1); break;
+        case  7: setSegments(digitNum, 1,1,1,0,0,0,0); break;
+        case  8: setSegments(digitNum, 1,1,1,1,1,1,1); break;
+        case  9: setSegments(digitNum, 1,1,1,1,0,1,1); break;
     }
 }
 
 void setDigits() {
     int nibble;
 
-    dumpText();
+#ifdef SCORE_PRINT
+    printf("%s %02d  %02d %s\n", 
+        (sideA ? ">" : " "),
+        scoreA,
+        scoreB,
+        (sideA ? " " : "<")
+    );
+#endif
 
     nibble = scoreA/10;
-    setDigit(digitA, nibble);
+    setDigit(DIGITA, nibble);
     nibble = scoreA%10;
-    setDigit(digitB, nibble);
+    setDigit(DIGITB, nibble);
     nibble = scoreB/10;
-    setDigit(digitC, nibble);
+    setDigit(DIGITC, nibble);
     nibble = scoreB%10;
-    setDigit(digitD, nibble);
+    setDigit(DIGITD, nibble);
 #if SIDES == 2
     nibble = scoreA/10;
-    setDigit(digitE, nibble);
+    setDigit(DIGITE, nibble);
     nibble = scoreA%10;
-    setDigit(digitF, nibble);
+    setDigit(DIGITF, nibble);
     nibble = scoreB/10;
-    setDigit(digitG, nibble);
+    setDigit(DIGITG, nibble);
     nibble = scoreB%10;
-    setDigit(digitH, nibble);
+    setDigit(DIGITH, nibble);
 #endif
 }
 
 
 
-void dumpDigitLine(int digit[ROWS][DIGIT_WIDTH], int row, char *post) {
+void dumpDigitLine(int digitNum, int row, char *post) {
     int col;
     for (col=0; col < DIGIT_WIDTH; col++) {
-        if (digit[row][col]) printf("%3s ", "X");
+        if (digits[digitNum][row][col]) printf("%3s ", "X");
         else                 printf("%3s ", " ");
     } 
     printf("%s", post);
@@ -537,18 +543,18 @@ void dumpDigitLine(int digit[ROWS][DIGIT_WIDTH], int row, char *post) {
 void dumpDigitLeds() {
     int row,j;
     for (row=0; row < ROWS; row++) {
-        dumpDigitLine(digitLedsA, row, " ");
-        dumpDigitLine(digitLedsB, row, "    ");
-        dumpDigitLine(digitLedsC, row, " ");
+        dumpDigitLine(DIGITA, row, " ");
+        dumpDigitLine(DIGITB, row, "    ");
+        dumpDigitLine(DIGITC, row, " ");
 #if SIDES == 1
-        dumpDigitLine(digitLedsD, row, "\n");
+        dumpDigitLine(DIGITD, row, "\n");
 #endif
 #if SIDES == 2
-        dumpDigitLine(digitLedsD, row, "  ...  ");
-        dumpDigitLine(digitLedsE, row, " ");
-        dumpDigitLine(digitLedsF, row, "    ");
-        dumpDigitLine(digitLedsG, row, " ");
-        dumpDigitLine(digitLedsH, row, "\n");
+        dumpDigitLine(DIGITD, row, "  ...  ");
+        dumpDigitLine(DIGITE, row, " ");
+        dumpDigitLine(DIGITF, row, "    ");
+        dumpDigitLine(DIGITG, row, " ");
+        dumpDigitLine(DIGITH, row, "\n");
 #endif  
     }
     printf("\n");
@@ -557,24 +563,25 @@ void dumpDigitLeds() {
 void dumpDigits() {
     int row,j;
     for (row=0; row < ROWS; row++) {
-        dumpDigitLine(digitA, row, " ");
-        dumpDigitLine(digitB, row, "    ");
-        dumpDigitLine(digitC, row, " ");
+        dumpDigitLine(DIGITA, row, " ");
+        dumpDigitLine(DIGITB, row, "    ");
+        dumpDigitLine(DIGITC, row, " ");
 #if SIDES == 1
-        dumpDigitLine(digitD, row, "\n");
+        dumpDigitLine(DIGITD, row, "\n");
 #endif
 #if SIDES == 2
-        dumpDigitLine(digitD, row, "  ...  ");
-        dumpDigitLine(digitE, row, " ");
-        dumpDigitLine(digitF, row, "    ");
-        dumpDigitLine(digitG, row, " ");
-        dumpDigitLine(digitH, row, "\n");
+        dumpDigitLine(DIGITD, row, "  ...  ");
+        dumpDigitLine(DIGITE, row, " ");
+        dumpDigitLine(DIGITF, row, "    ");
+        dumpDigitLine(DIGITG, row, " ");
+        dumpDigitLine(DIGITH, row, "\n");
 #endif  
     }
     printf("\n");
 }
 
 
+#ifdef TEST_SEQUENCE
 void testSeq() {
     // setup
     clearDigits();
@@ -605,6 +612,7 @@ void testSeq() {
     setDigits();
     dumpDigits();
 }
+#endif // TEST_SEQUENCE
 
 
 
@@ -630,32 +638,34 @@ void loop() {
         case 's': scoreSideToggle(); break;
         case 'p': scorePlus(); break;
         case 'm': scoreMinus(); break;
+#ifdef SIMULATION
         case '?' :
         case 'h' : usage(); break;
-        case 'q' : running = false; break;
+#endif
+#ifdef REFERENCE_TABLE
         case 't':
             printLedTableReference();
             dumpDigitLeds();
             break;
+#endif
     }
     clearOperation();
-    dumpText();
     setDigits();
     dumpDigits();
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 // Main
-////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int main(void) {
 
+#ifdef TEST_SEQUENCE
     testSeq();
+#endif
 
     setup();
-    while (running) {
+    while (1) {
         loop();
     }
     return 0;
