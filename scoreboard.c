@@ -10,7 +10,6 @@
 
 #define SIMULATION
 #define SCORE_PRINT
-#define REFERENCE_TABLE
 #define TEST_SEQUENCE
 
 
@@ -80,127 +79,32 @@ void usage() {
     printf("  m - subtract to side-active score\n");
 }
 
-#ifdef REFERENCE_TABLE
-int ledReferenceTable[ROWS][COLS];
-void printLedTableReference() {
-    int i, side, cols, col, row, index;
-
-    // verify columns
-    cols = SIDES * (4*DIGIT_WIDTH + 2*DIGIT_GAP + SCORE_GAP);
-    if (cols != COLS) {
-        printf("WARNING: estimated col (%d) != COL (%d)\n", cols, COLS);
-    }
-
-#if TOP_RIGHT == 1
-    // start top,left
-    printf("int ledReferenceTable[%d][%d] = [\n", ROWS, COLS);
-    index = 0;
+int ledStripAsTable[5][22] = {
+  {  40,  41,  42,  43,  -1,  -1,  -1,  47,  48,  49,  50,       51,  52,  53,  54,  -1,  -1,  -1,  58,  59,  60,  61 },
+  {  62,  63,  64,  65,  -1,  -1,  -1,  69,  70,  71,  72,       73,  74,  75,  76,  -1,  -1,  -1,  80,  81,  82,  83 },
+  {  84,  85,  86,  87,  -1,  -1,  -1,  91,  92,  93,  94,       95,  96,  97,  98,  -1,  -1,  -1, 102, 103, 104, 105 },
+  { 106, 107, 108, 109,  -1,  -1,  -1, 113, 114, 115, 116,      117, 118, 119, 120,  -1,  -1,  -1, 124, 125, 126, 127 },
+  { 128, 129, 130, 131,  -1,  -1,  -1, 135, 136, 137, 138,      139, 140, 141, 142,  -1,  -1,  -1, 146, 147, 148, 149 }
+};
+int ledStripAsTableValues[5][22] = {
+  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  },
+  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  },
+  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  },
+  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  },
+  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,        0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0  }
+};
+void dumpLedStripAsTableValues() {
+    int col, row;
     for (row = 0; row < ROWS; row++) {
-        col = 0;
-        printf("  [ ");
-        for (side = 0; side < SIDES; side++) {
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<SCORE_GAP; i++) {
-                printf(" ");
-                col++;
-                index++;
-           }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d", index);
-                if ((col+1) < COLS) printf(", ");
-                else                  printf(" ");
-                col++;
-                index++;
-            }
-            if ((side+1) < SIDES) printf("     ");
+        for (col = 0; col < COLS; col++) {
+            if (col == COLS/2) printf("     ");
+            if ((col+1) < COLS) printf("%3d,", ledStripAsTableValues[row][col]);
+            else                printf("%3d ", ledStripAsTableValues[row][col]);
         }
-        printf("]");
-        if ((row+1) < ROWS) printf(",");
         printf("\n");
     }
-    printf("];\n");
-#endif // TOP_RIGHT=1
-
-
-#if TOP_RIGHT == 0
-    // start bottom,right
-    printf("int ledReferenceTable[%d][%d] = [\n", ROWS, COLS);
-    index = (ROWS * COLS) -1;
-    for (row = 0; row < ROWS; row++) {
-        col = 0;
-        printf("  [ ");
-        for (side = 0; side < SIDES; side++) {
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<SCORE_GAP; i++) {
-                printf(" ");
-                col++;
-                index--;
-           }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf(" ");
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_WIDTH; i++) {
-                printf("%03d", index);
-                if ((col+1) < COLS) printf(", ");
-                else                  printf(" ");
-                col++;
-                index--;
-            }
-            if ((side+1) < SIDES) printf("     ");
-        }
-        printf("]");
-        if ((row+1) < ROWS) printf(",");
-        printf("\n");
-    }
-    printf("];\n");
-#endif // TOP_RIGHT=1
 }
-#endif // REFERENCE_TABLE
+
 
 void setupDigitLeds() {
     int i, side, cols, col, row, index;
@@ -642,12 +546,6 @@ void loop() {
         case '?' :
         case 'h' : usage(); break;
 #endif
-#ifdef REFERENCE_TABLE
-        case 't':
-            printLedTableReference();
-            dumpDigitLeds();
-            break;
-#endif
     }
     clearOperation();
     setDigits();
@@ -661,8 +559,16 @@ void loop() {
 int main(void) {
 
 #ifdef TEST_SEQUENCE
-    testSeq();
+    //testSeq();
 #endif
+
+dumpLedStripAsTableValues();
+ledStripAsTableValues[0][2] = 1;
+ledStripAsTableValues[1][2] = 1;
+ledStripAsTableValues[2][2] = 1;
+ledStripAsTableValues[3][2] = 1;
+ledStripAsTableValues[4][2] = 1;
+dumpLedStripAsTableValues();
 
     setup();
     while (1) {
