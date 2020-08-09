@@ -72,6 +72,8 @@ https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
 
 https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#:~:text=One%20of%20the%20greatest%20features,it%20and%20access%20web%20pages.
 
+https://howtomechatronics.com/tutorials/arduino/how-to-control-ws2812b-individually-addressable-leds-using-arduino/
+
 
 ## TODO - C applicaiton
 
