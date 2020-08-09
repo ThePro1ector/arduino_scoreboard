@@ -27,163 +27,277 @@
 #define DIGIT_WIDTH_LSB 3
 #define DIGIT_GAP       0
 #define SCORE_GAP       3
+#define MAX_SCORE       19
 
 
-void printLedStripAsTable() {
+void clearTable(int table[ROWS][COLS], int val) {
+    int col, row;
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < COLS; col++) {
+            table[row][col] = val;
+        }
+    }
+}
+
+void setDigitValuesMSB(int digit[ROWS][DIGIT_WIDTH_MSB], int val) {
+    int col, row;
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < DIGIT_WIDTH_MSB; col++) {
+            digit[row][col] = val;
+        }
+    }
+}
+
+void setDigitValuesLSB(int digit[ROWS][DIGIT_WIDTH_LSB], int val) {
+    int col, row;
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < DIGIT_WIDTH_LSB; col++) {
+            digit[row][col] = val;
+        }
+    }
+}
+
+void dumpTable(int table[ROWS][COLS], char *name) {
+    int col, row;
+    printf("int %s[ROWS][COLS] = {\n", name);
+    for (row = 0; row < ROWS; row++) {
+        printf("  {");
+        for (col = 0; col < COLS; col++) {
+#if SIDES == 2
+            if (col == COLS/2) printf("     ");
+#endif
+            if ((col+1) < COLS) printf("%3d,", table[row][col]);
+            else                printf("%3d ", table[row][col]);
+        }
+        if ((row+1) < ROWS) printf("},\n");
+        else                printf("}\n");
+    }
+    printf("};\n");
+}
+
+void dumpDigitMSB(int digit[ROWS][DIGIT_WIDTH_MSB], char *name) {
+    int col, row;
+    printf("int %s[ROWS][DIGIT_WIDTH_MSB] = {\n", name);
+    for (row = 0; row < ROWS; row++) {
+        printf("  {");
+        for (col = 0; col < DIGIT_WIDTH_MSB; col++) {
+            if ((col+1) < DIGIT_WIDTH_MSB) printf("%3d,", digit[row][col]);
+            else                printf("%3d ", digit[row][col]);
+        }
+        if ((row+1) < ROWS) printf("},\n");
+        else                printf("}\n");
+    }
+    printf("};\n");
+}
+
+void dumpDigitLSB(int digit[ROWS][DIGIT_WIDTH_LSB], char *name) {
+    int col, row;
+    printf("int %s[ROWS][DIGIT_WIDTH_LSB] = {\n", name);
+    for (row = 0; row < ROWS; row++) {
+        printf("  {");
+        for (col = 0; col < DIGIT_WIDTH_LSB; col++) {
+            if ((col+1) < DIGIT_WIDTH_LSB) printf("%3d,", digit[row][col]);
+            else                printf("%3d ", digit[row][col]);
+        }
+        if ((row+1) < ROWS) printf("},\n");
+        else                printf("}\n");
+    }
+    printf("};\n");
+}
+
+
+void printLedArrays() {
     int i, side, cols, col, row, index;
     int maxScore = 0;
-    int A, B, C, D, E, F, G, H;
+    int table[ROWS][COLS];
+    int digitA[ROWS][DIGIT_WIDTH_MSB];
+    int digitB[ROWS][DIGIT_WIDTH_LSB];
+    int digitC[ROWS][DIGIT_WIDTH_MSB];
+    int digitD[ROWS][DIGIT_WIDTH_LSB];
+    int digitE[ROWS][DIGIT_WIDTH_MSB];
+    int digitF[ROWS][DIGIT_WIDTH_LSB];
+    int digitG[ROWS][DIGIT_WIDTH_MSB];
+    int digitH[ROWS][DIGIT_WIDTH_LSB];
 
-    // verify columns
-    cols = SIDES * (2*(DIGIT_WIDTH_MSB+DIGIT_WIDTH_LSB) + 2*DIGIT_GAP + SCORE_GAP);
-    if (cols != COLS) {
-        printf("WARNING: estimated col (%d) != COL (%d)\n", cols, COLS);
-    }
-    A = 0;
-    B = A + DIGIT_WIDTH_MSB + DIGIT_GAP;
-    C = B + DIGIT_WIDTH_LSB + SCORE_GAP;
-    D = C + DIGIT_WIDTH_MSB + DIGIT_GAP;
-    E = D + DIGIT_WIDTH_LSB;
-    F = E + DIGIT_WIDTH_MSB + DIGIT_GAP;
-    G = F + DIGIT_WIDTH_LSB + SCORE_GAP;
-    H = G + DIGIT_WIDTH_MSB + DIGIT_GAP;
-
-    printf("// #define TOP_RIGHT       %d\n", TOP_RIGHT);
-    printf("// #define START_LED       %d\n", START_LED);
-    printf("// #define COLS            %d\n", COLS);
-    printf("// #define ROWS            %d\n", ROWS);
-    printf("// #define SIDES           %d\n", SIDES);
-    printf("// #define DIGIT_WIDTH_MSB %d\n", DIGIT_WIDTH_MSB);
-    printf("// #define DIGIT_WIDTH_LSB %d\n", DIGIT_WIDTH_LSB);
-    printf("// #define DIGIT_GAP       %d\n", DIGIT_GAP);
-    printf("// #define SCORE_GAP       %d\n", SCORE_GAP);
-    printf("// #define OFFSET_DIGITA   %d\n", A);
-    printf("// #define OFFSET_DIGITB   %d\n", B);
-    printf("// #define OFFSET_DIGITC   %d\n", C);
-    printf("// #define OFFSET_DIGITD   %d\n", D);
-#if SIDES == 2
-    printf("// #define OFFSET_DIGITE   %d\n", E);
-    printf("// #define OFFSET_DIGITF   %d\n", F);
-    printf("// #define OFFSET_DIGITG   %d\n", G);
-    printf("// #define OFFSET_DIGITH   %d\n", H);
-#endif
-     
-     
-    if (DIGIT_WIDTH_MSB >= 3 && DIGIT_WIDTH_LSB >= 3) maxScore = 99;
-    else if (DIGIT_WIDTH_MSB == 1 && DIGIT_WIDTH_LSB >= 3) maxScore = 19;
-    printf("// #define MAX_SCORE       %d\n", maxScore);
-    printf("\n");
-
+    clearTable(table, -1);
 #if TOP_RIGHT == 1
     // start top,left
-    printf("int ledStripAsTable[%d][%d] = {\n", ROWS, COLS);
     index = START_LED;
     if (START_LED == -1) index = 0;
     for (row = 0; row < ROWS; row++) {
         col = 0;
-        printf("  { ");
-        for (side = 0; side < SIDES; side++) {
-            for (i=0; i<DIGIT_WIDTH_MSB; i++) {
-                printf("%3d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf("%3d, ", -1);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_WIDTH_LSB; i++) {
-                printf("%3d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<SCORE_GAP; i++) {
-                printf("%3d, ", -1);
-                col++;
-                index++;
-           }
-            for (i=0; i<DIGIT_WIDTH_MSB; i++) {
-                printf("%3d, ", index);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf("%3d, ", -1);
-                col++;
-                index++;
-            }
-            for (i=0; i<DIGIT_WIDTH_LSB; i++) {
-                printf("%3d", index);
-                if ((col+1) < COLS) printf(", ");
-                else                  printf(" ");
-                col++;
-                index++;
-            }
-            if ((side+1) < SIDES) printf("     ");
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitA[row][i] = index;
+            col++;
+            index++;
         }
-        printf("}");
-        if ((row+1) < ROWS) printf(",");
-        printf("\n");
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitB[row][i] = index;
+            col++;
+            index++;
+        }
+        for (i=0; i<SCORE_GAP; i++) {
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitC[row][i] = index;
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitD[row][i] = index;
+            col++;
+            index++;
+        }
+#if SIDES == 2
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitE[row][i] = index;
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitF[row][i] = index;
+            col++;
+            index++;
+        }
+        for (i=0; i<SCORE_GAP; i++) {
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitG[row][i] = index;
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index++;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitH[row][i] = index;
+            col++;
+            index++;
+        }
+#endif // SIDES == 2
     }
-    printf("};\n");
 #endif // TOP_RIGHT=1
 
 
 #if TOP_RIGHT == 0
     // start bottom,right
-    printf("int ledStripAsTable[%d][%d] = {\n", ROWS, COLS);
     index = START_LED;
     if (START_LED == -1) index = (ROWS * COLS) -1;
-     for (row = 0; row < ROWS; row++) {
+    index = START_LED;
+    if (START_LED == -1) index = 0;
+    for (row = 0; row < ROWS; row++) {
         col = 0;
-        printf("  { ");
-        for (side = 0; side < SIDES; side++) {
-            for (i=0; i<DIGIT_WIDTH_MSB; i++) {
-                printf("%3d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf("%3d, ", -1);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_WIDTH_LSB; i++) {
-                printf("%3d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<SCORE_GAP; i++) {
-                printf("%3d, ", -1);
-                col++;
-                index--;
-           }
-            for (i=0; i<DIGIT_WIDTH_MSB; i++) {
-                printf("%3d, ", index);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_GAP; i++) {
-                printf("%3d, ", -1);
-                col++;
-                index--;
-            }
-            for (i=0; i<DIGIT_WIDTH_LSB; i++) {
-                printf("%3d", index);
-                if ((col+1) < COLS) printf(", ");
-                else                  printf(" ");
-                col++;
-                index--;
-            }
-            if ((side+1) < SIDES) printf("     ");
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitA[row][i] = index;
+            col++;
+            index--;
         }
-        printf("}");
-        if ((row+1) < ROWS) printf(",");
-        printf("\n");
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitB[row][i] = index;
+            col++;
+            index--;
+        }
+        for (i=0; i<SCORE_GAP; i++) {
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitC[row][i] = index;
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitD[row][i] = index;
+            col++;
+            index--;
+        }
+#if SIDES == 2
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitE[row][i] = index;
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitF[row][i] = index;
+            col++;
+            index--;
+        }
+        for (i=0; i<SCORE_GAP; i++) {
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_WIDTH_MSB; i++) {
+            table[row][col] = index;
+            digitG[row][i] = index;
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_GAP; i++) {
+            col++;
+            index--;
+        }
+        for (i=0; i<DIGIT_WIDTH_LSB; i++) {
+            table[row][col] = index;
+            digitH[row][i] = index;
+            col++;
+            index--;
+        }
+#endif // SIDES == 2
     }
-    printf("};\n");
 #endif // TOP_RIGHT=1
+
+    dumpTable(table, "ledTable");
+    dumpDigitMSB(digitA, "digitA");
+    dumpDigitLSB(digitB, "digitB");
+    dumpDigitMSB(digitC, "digitC");
+    dumpDigitLSB(digitD, "digitD");
+    dumpDigitMSB(digitE, "digitE");
+    dumpDigitLSB(digitF, "digitF");
+    dumpDigitMSB(digitG, "digitG");
+    dumpDigitLSB(digitH, "digitH");
 
     // verify columns
     cols = SIDES * (2*(DIGIT_WIDTH_MSB+DIGIT_WIDTH_LSB) + 2*DIGIT_GAP + SCORE_GAP);
@@ -193,24 +307,6 @@ void printLedStripAsTable() {
 }
 
 
-void printLedStripAsTableValues() {
-    int col, row;
-
-    printf("int ledStripAsTableValues[%d][%d] = {\n", ROWS, COLS);
-    for (row = 0; row < ROWS; row++) {
-        printf("  { ");
-        for (col = 0; col < COLS; col++) {
-            if (SIDES == 2 && col == COLS/2) printf("     ");
-
-            if ((col+1) < COLS) printf("%3d, ", 0);
-            else                printf("%3d  ", 0);
-        }
-        printf("}");
-        if ((row+1) < ROWS) printf(",");
-        printf("\n");
-    }
-    printf("};\n");
-}
 
 
 
@@ -233,14 +329,7 @@ void printLedStripAsTableValues() {
 // #define SCORE_GAP       3
 // #define MAX_SCORE       19
 
-#define OFFSET_DIGITA   0
-#define OFFSET_DIGITB   1
-#define OFFSET_DIGITC   7
-#define OFFSET_DIGITD   8
-#define OFFSET_DIGITE   11
-#define OFFSET_DIGITF   12
-#define OFFSET_DIGITG   18
-#define OFFSET_DIGITH   19
+
 
 // TODO change to variables for sides
 #define LED_LEVELR 1
@@ -269,6 +358,72 @@ void printLedStripAsTableValues() {
 int side1 = 1;
 int score1 = 0;
 int score2 = 0;
+
+int ledTable[ROWS][COLS] = {
+  { 40, 41, 42, 43, -1, -1, -1, 47, 48, 49, 50,      51, 52, 53, 54, -1, -1, -1, 58, 59, 60, 61 },
+  { 62, 63, 64, 65, -1, -1, -1, 69, 70, 71, 72,      73, 74, 75, 76, -1, -1, -1, 80, 81, 82, 83 },
+  { 84, 85, 86, 87, -1, -1, -1, 91, 92, 93, 94,      95, 96, 97, 98, -1, -1, -1,102,103,104,105 },
+  {106,107,108,109, -1, -1, -1,113,114,115,116,     117,118,119,120, -1, -1, -1,124,125,126,127 },
+  {128,129,130,131, -1, -1, -1,135,136,137,138,     139,140,141,142, -1, -1, -1,146,147,148,149 }
+};
+int digitA[ROWS][DIGIT_WIDTH_MSB] = {
+  { 40 },
+  { 62 },
+  { 84 },
+  {106 },
+  {128 }
+};
+int digitB[ROWS][DIGIT_WIDTH_LSB] = {
+  { 41, 42, 43 },
+  { 63, 64, 65 },
+  { 85, 86, 87 },
+  {107,108,109 },
+  {129,130,131 }
+};
+int digitC[ROWS][DIGIT_WIDTH_MSB] = {
+  { 47 },
+  { 69 },
+  { 91 },
+  {113 },
+  {135 }
+};
+int digitD[ROWS][DIGIT_WIDTH_LSB] = {
+  { 48, 49, 50 },
+  { 70, 71, 72 },
+  { 92, 93, 94 },
+  {114,115,116 },
+  {136,137,138 }
+};
+int digitE[ROWS][DIGIT_WIDTH_MSB] = {
+  { 51 },
+  { 73 },
+  { 95 },
+  {117 },
+  {139 }
+};
+int digitF[ROWS][DIGIT_WIDTH_LSB] = {
+  { 52, 53, 54 },
+  { 74, 75, 76 },
+  { 96, 97, 98 },
+  {118,119,120 },
+  {140,141,142 }
+};
+int digitG[ROWS][DIGIT_WIDTH_MSB] = {
+  { 58 },
+  { 80 },
+  {102 },
+  {124 },
+  {146 }
+};
+int digitH[ROWS][DIGIT_WIDTH_LSB] = {
+  { 59, 60, 61 },
+  { 81, 82, 83 },
+  {103,104,105 },
+  {125,126,127 },
+  {147,148,149 }
+};
+
+
 
 
 int ledStripAsTable[5][22] = {
@@ -328,22 +483,6 @@ void updateLed(int position, int value) {
 #endif // SIMULATED
 }
 
-// TODO: should we generate a table for this
-int digitOffset(int digitNum) {
-    int offset = 0;
-    switch(digitNum) {
-        case DIGITA: offset = OFFSET_DIGITA; break;
-        case DIGITB: offset = OFFSET_DIGITB; break;
-        case DIGITC: offset = OFFSET_DIGITC; break;
-        case DIGITD: offset = OFFSET_DIGITD; break;
-        case DIGITE: offset = OFFSET_DIGITE; break;
-        case DIGITF: offset = OFFSET_DIGITF; break;
-        case DIGITG: offset = OFFSET_DIGITG; break;
-        case DIGITH: offset = OFFSET_DIGITH; break;
-    }
-    return offset;
-
-}
 
 void clearDigit(int digitNum, int val) {
     // int i,j;
@@ -465,39 +604,39 @@ void scoresMinus() {
 ////////////////////////////////////////////////////////////////////////////////
 int main(void) {
 
-    printLedStripAsTable();
-    printLedStripAsTableValues();
+    printLedArrays();
+    // printLedArraysValues();
 
-    dumpLedStripAsTableValues();
+    // dumpLedStripAsTableValues();
 
-    scoresReset();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresReset();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 
-    scoresPlus();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresPlus();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 
-    scoresPlus();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresPlus();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 
-    scoresSide();
+    // scoresSide();
 
-    scoresPlus();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresPlus();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 
-    scoresPlus();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresPlus();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 
-    scoresMinus();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresMinus();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 
-    scoresReset();
-    updateScores();
-    dumpLedStripAsTableValues();
+    // scoresReset();
+    // updateScores();
+    // dumpLedStripAsTableValues();
 }
 
