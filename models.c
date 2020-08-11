@@ -17,6 +17,15 @@
 #define SCORE_GAP       3
 #define MAX_SCORE       99
 
+#define DIGITA  0
+#define DIGITB  1
+#define DIGITC  2
+#define DIGITD  3
+#define DIGITE  4
+#define DIGITF  5
+#define DIGITG  6
+#define DIGITH  7
+#define DIGITS  8
 
 
 void clearTable(int table[ROWS][COLS], int val) {
@@ -53,17 +62,21 @@ void dumpTable(int table[ROWS][COLS], char *name) {
     printf("};\n");
 }
 
-void dumpDigitArray(int digit[ROWS][DIGIT_WIDTH], char *name) {
-    int col, row;
-    printf("int %s[ROWS][DIGIT_WIDTH] = {\n", name);
-    for (row = 0; row < ROWS; row++) {
-        printf("  {");
-        for (col = 0; col < DIGIT_WIDTH; col++) {
-            if ((col+1) < DIGIT_WIDTH) printf("%3d,", digit[row][col]);
-            else                printf("%3d ", digit[row][col]);
+void dumpDigitsArray(int digits[DIGITS][ROWS][DIGIT_WIDTH], char *name) {
+    int col, row, digit;
+    printf("int %s[DIGITS][ROWS][DIGIT_WIDTH] = {\n", name);
+    for (digit = 0; digit < DIGITS; digit++) {
+        printf("{\n");
+         for (row = 0; row < ROWS; row++) {
+            printf("  {");
+            for (col = 0; col < DIGIT_WIDTH; col++) {
+                if ((col+1) < DIGIT_WIDTH) printf("%3d,", digits[digit][row][col]);
+                else                printf("%3d ", digits[digit][row][col]);
+            }
+            if ((row+1) < ROWS) printf("},\n");
+            else                printf("}\n");
         }
-        if ((row+1) < ROWS) printf("},\n");
-        else                printf("}\n");
+        printf("},\n");
     }
     printf("};\n");
 }
@@ -89,14 +102,7 @@ void printLedArrays() {
     int i, side, cols, col, row, index;
     int table[ROWS][COLS];
     int tableValues[ROWS][COLS];
-    int digitA[ROWS][DIGIT_WIDTH];
-    int digitB[ROWS][DIGIT_WIDTH];
-    int digitC[ROWS][DIGIT_WIDTH];
-    int digitD[ROWS][DIGIT_WIDTH];
-    int digitE[ROWS][DIGIT_WIDTH];
-    int digitF[ROWS][DIGIT_WIDTH];
-    int digitG[ROWS][DIGIT_WIDTH];
-    int digitH[ROWS][DIGIT_WIDTH];
+    int digits[DIGITS][ROWS][DIGIT_WIDTH];
 
     clearTable(table, -1);
 #if TOP_RIGHT == 1
@@ -107,7 +113,7 @@ void printLedArrays() {
         col = 0;
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitA[row][i] = index;
+            digits[DIGITA][row][i] = index;
             col++;
             index++;
         }
@@ -117,7 +123,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitB[row][i] = index;
+            digits[DIGITB][row][i] = index;
             col++;
             index++;
         }
@@ -127,7 +133,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitC[row][i] = index;
+            digits[DIGITC][row][i] = index;
             col++;
             index++;
         }
@@ -137,13 +143,13 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitD[row][i] = index;
+            digits[DIGITD][row][i] = index;
             col++;
             index++;
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitE[row][i] = index;
+            digits[DIGITE][row][i] = index;
             col++;
             index++;
         }
@@ -153,7 +159,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitF[row][i] = index;
+            digits[DIGITF][row][i] = index;
             col++;
             index++;
         }
@@ -163,7 +169,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitG[row][i] = index;
+            digits[DIGITG][row][i] = index;
             col++;
             index++;
         }
@@ -173,7 +179,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitH[row][i] = index;
+            digits[DIGITH][row][i] = index;
             col++;
             index++;
         }
@@ -191,7 +197,7 @@ void printLedArrays() {
         col = 0;
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitA[row][i] = index;
+            digits[DIGITA][row][i] = index;
             col++;
             index--;
         }
@@ -201,7 +207,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitB[row][i] = index;
+            digits[DIGITB][row][i] = index;
             col++;
             index--;
         }
@@ -211,7 +217,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitC[row][i] = index;
+            digits[DIGITC][row][i] = index;
             col++;
             index--;
         }
@@ -221,13 +227,13 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitD[row][i] = index;
+            digits[DIGITD][row][i] = index;
             col++;
             index--;
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitE[row][i] = index;
+            digits[DIGITE][row][i] = index;
             col++;
             index--;
         }
@@ -237,7 +243,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitF[row][i] = index;
+            digits[DIGITF][row][i] = index;
             col++;
             index--;
         }
@@ -247,7 +253,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitG[row][i] = index;
+            digits[DIGITG][row][i] = index;
             col++;
             index--;
         }
@@ -257,7 +263,7 @@ void printLedArrays() {
         }
         for (i=0; i<DIGIT_WIDTH; i++) {
             table[row][col] = index;
-            digitH[row][i] = index;
+            digits[DIGITH][row][i] = index;
             col++;
             index--;
         }
@@ -272,14 +278,7 @@ void printLedArrays() {
 
     dumpTable(table, "ledTable");
     dumpTable(tableValues, "ledTableValues");
-    dumpDigitArray(digitA, "digitA");
-    dumpDigitArray(digitB, "digitB");
-    dumpDigitArray(digitC, "digitC");
-    dumpDigitArray(digitD, "digitD");
-    dumpDigitArray(digitE, "digitE");
-    dumpDigitArray(digitF, "digitF");
-    dumpDigitArray(digitG, "digitG");
-    dumpDigitArray(digitH, "digitH");
+    dumpDigitsArray(digits, "ledDigitsArray");
 
     // verify columns
     cols = SIDES * (2*(DIGIT_WIDTH+DIGIT_WIDTH) + 2*DIGIT_GAP + SCORE_GAP);
@@ -345,7 +344,7 @@ void printNumArrays() {
     setSegments(num8, 1,1,1,1,1,1,1);
     setSegments(num9, 1,1,1,1,0,1,1);
 
-    printf("int numArrays[10][ROWS][COLS] = {\n");
+    printf("int numArrays[10][ROWS][DIGIT_WIDTH] = {\n");
     dumpNumArray(num0);
     dumpNumArray(num1);
     dumpNumArray(num2);
@@ -395,61 +394,63 @@ int ledTableValues[ROWS][COLS] = {
   {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
   {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }
 };
-int digitA[ROWS][DIGIT_WIDTH] = {
+int ledDigitsArray[DIGITS][ROWS][DIGIT_WIDTH] = {
+{
   {  0,  1,  2 },
   { 30, 31, 32 },
   { 60, 61, 62 },
   { 90, 91, 92 },
   {120,121,122 }
-};
-int digitB[ROWS][DIGIT_WIDTH] = {
+},
+{
   {  3,  4,  5 },
   { 33, 34, 35 },
   { 63, 64, 65 },
   { 93, 94, 95 },
   {123,124,125 }
-};
-int digitC[ROWS][DIGIT_WIDTH] = {
+},
+{
   {  9, 10, 11 },
   { 39, 40, 41 },
   { 69, 70, 71 },
   { 99,100,101 },
   {129,130,131 }
-};
-int digitD[ROWS][DIGIT_WIDTH] = {
+},
+{
   { 12, 13, 14 },
   { 42, 43, 44 },
   { 72, 73, 74 },
   {102,103,104 },
   {132,133,134 }
-};
-int digitE[ROWS][DIGIT_WIDTH] = {
+},
+{
   { 15, 16, 17 },
   { 45, 46, 47 },
   { 75, 76, 77 },
   {105,106,107 },
   {135,136,137 }
-};
-int digitF[ROWS][DIGIT_WIDTH] = {
+},
+{
   { 18, 19, 20 },
   { 48, 49, 50 },
   { 78, 79, 80 },
   {108,109,110 },
   {138,139,140 }
-};
-int digitG[ROWS][DIGIT_WIDTH] = {
+},
+{
   { 24, 25, 26 },
   { 54, 55, 56 },
   { 84, 85, 86 },
   {114,115,116 },
   {144,145,146 }
-};
-int digitH[ROWS][DIGIT_WIDTH] = {
+},
+{
   { 27, 28, 29 },
   { 57, 58, 59 },
   { 87, 88, 89 },
   {117,118,119 },
   {147,148,149 }
+},
 };
 int numArrays[10][ROWS][COLS] = {
 {
@@ -550,6 +551,33 @@ void updateLed(int position, int value) {
 }
 
 
+void updateDigit(int digitNum, int nibble) {
+    // get pointer to numArrays from nibble, numPtr
+    // get pointer to digitN from digit num, digPtr 
+    // for each row/col call updateLed(*digPtr, *numPtr)
+    int row, col, led, val;
+
+    // switch (digitNum) {
+    //     case DIGITA: digPtr = &digitA; break;
+    //     case DIGITB: digPtr = &digitB; break;
+    //     case DIGITC: digPtr = &digitC; break;
+    //     case DIGITD: digPtr = &digitD; break;
+    //     case DIGITE: digPtr = digitE; break;
+    //     case DIGITF: digPtr = digitF; break;
+    //     case DIGITG: digPtr = digitG; break;
+    //     case DIGITH: digPtr = digitH; break;
+    // }
+
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < DIGIT_WIDTH; col++) {
+            led =  ledDigitsArray[digitNum][row][col];
+            val =  numArrays[nibble][row][col];
+            updateLed(led,val);
+        }   
+    }
+}
+
+
 
 void updateScores() {
 #ifdef SIMULATED
@@ -561,11 +589,11 @@ void updateScores() {
     );
 #endif
 
-    // int nibble;
-    // nibble = score1/10;
-    // updateDigit(DIGITA, nibble);
-    // nibble = score1%10;
-    // updateDigit(DIGITB, nibble);
+    int nibble;
+    nibble = score1/10;
+    updateDigit(DIGITA, nibble);
+    nibble = score1%10;
+    updateDigit(DIGITB, nibble);
     // nibble = score2/10;
     // updateDigit(DIGITC, nibble);
     // nibble = score2%10;
