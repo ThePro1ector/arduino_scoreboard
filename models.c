@@ -45,7 +45,7 @@ void dumpTable(int table[ROWS][COLS], char *name) {
         for (col = 0; col < COLS; col++) {
             if (col == COLS/2) printf("     ");
             if ((col+1) < COLS) printf("%3d,", table[row][col]);
-            else                printf("%3d ", table[row][col]);
+            else                printf("%3d", table[row][col]);
         }
         if ((row+1) < ROWS) printf("},\n");
         else                printf("}\n");
@@ -88,6 +88,7 @@ void dumpNumArray(int digit[ROWS][DIGIT_WIDTH]) {
 void printLedArrays() {
     int i, side, cols, col, row, index;
     int table[ROWS][COLS];
+    int tableValues[ROWS][COLS];
     int digitA[ROWS][DIGIT_WIDTH];
     int digitB[ROWS][DIGIT_WIDTH];
     int digitC[ROWS][DIGIT_WIDTH];
@@ -263,7 +264,14 @@ void printLedArrays() {
     }
 #endif // TOP_RIGHT=1
 
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < COLS; col++) {
+            tableValues[row][col] = 0;
+        }
+    }
+
     dumpTable(table, "ledTable");
+    dumpTable(tableValues, "ledTableValues");
     dumpDigitArray(digitA, "digitA");
     dumpDigitArray(digitB, "digitB");
     dumpDigitArray(digitC, "digitC");
@@ -380,8 +388,13 @@ int ledTable[ROWS][COLS] = {
   { 90, 91, 92, 93, 94, 95, -1, -1, -1, 99,100,101,102,103,104,     105,106,107,108,109,110, -1, -1, -1,114,115,116,117,118,119 },
   {120,121,122,123,124,125, -1, -1, -1,129,130,131,132,133,134,     135,136,137,138,139,140, -1, -1, -1,144,145,146,147,148,149 }
 };
-int  ledTableValues[ROWS][COLS];
-
+int ledTableValues[ROWS][COLS] = {
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 }
+};
 int digitA[ROWS][DIGIT_WIDTH] = {
   {  0,  1,  2 },
   { 30, 31, 32 },
@@ -602,36 +615,36 @@ int main(void) {
     printNumArrays();
     // printLedArraysValues();
 
-    // dumpLedStripAsTableValues();
+    dumpTable(ledTableValues, "ledTableValues");
 
-    // scoresReset();
-    // updateScores();
-    // dumpLedStripAsTableValues();
+    scoresReset();
+    updateScores();
+    dumpTable(ledTableValues, "ledTableValues");
+
+    scoresPlus();
+    updateScores();
+    dumpTable(ledTableValues, "ledTableValues");
 
     // scoresPlus();
     // updateScores();
-    // dumpLedStripAsTableValues();
-
-    // scoresPlus();
-    // updateScores();
-    // dumpLedStripAsTableValues();
+    // dumpTable(ledTableValues, "ledTableValues");
 
     // scoresSide();
 
     // scoresPlus();
     // updateScores();
-    // dumpLedStripAsTableValues();
+    // dumpTable(ledTableValues, "ledTableValues");
 
     // scoresPlus();
     // updateScores();
-    // dumpLedStripAsTableValues();
+    // dumpTable(ledTableValues, "ledTableValues");
 
     // scoresMinus();
     // updateScores();
-    // dumpLedStripAsTableValues();
+    // dumpTable(ledTableValues, "ledTableValues");
 
     // scoresReset();
     // updateScores();
-    // dumpLedStripAsTableValues();
+    // dumpTable(ledTableValues, "ledTableValues");
 }
 
