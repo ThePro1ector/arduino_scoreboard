@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+
 // rm -f ./runme ; gcc models.c -o runme ; ./runme
 
 // C version to test ideas faster without loading on Arduino
@@ -28,22 +29,23 @@
 #define DIGITS  8
 
 
-void clearTable(int table[ROWS][COLS], int val) {
-    int col, row;
+
+void dumpTableOnly(int table[ROWS][COLS]) {
+    int col, row, val;
+
     for (row = 0; row < ROWS; row++) {
         for (col = 0; col < COLS; col++) {
-            table[row][col] = val;
+            if (col == COLS/2) printf("     ");
+            val = table[row][col];
+            if (val) {
+                printf("%3d ", table[row][col]);
+            } else {
+                printf("%3s ", " ");              
+            }
         }
-    }
-}
-
-void setDigitValues(int digit[ROWS][DIGIT_WIDTH], int val) {
-    int col, row;
-    for (row = 0; row < ROWS; row++) {
-        for (col = 0; col < DIGIT_WIDTH; col++) {
-            digit[row][col] = val;
-        }
-    }
+        if ((row+1) < ROWS) printf("\n");
+   }
+    printf("\n");
 }
 
 void dumpTable(int table[ROWS][COLS], char *name) {
@@ -61,6 +63,7 @@ void dumpTable(int table[ROWS][COLS], char *name) {
     }
     printf("};\n");
 }
+
 
 void dumpDigitsArray(int digits[DIGITS][ROWS][DIGIT_WIDTH], char *name) {
     int col, row, digit;
@@ -97,6 +100,24 @@ void dumpNumArray(int digit[ROWS][DIGIT_WIDTH]) {
 }
 
 
+
+void clearTable(int table[ROWS][COLS], int val) {
+    int col, row;
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < COLS; col++) {
+            table[row][col] = val;
+        }
+    }
+}
+
+void setDigitValues(int digit[ROWS][DIGIT_WIDTH], int val) {
+    int col, row;
+    for (row = 0; row < ROWS; row++) {
+        for (col = 0; col < DIGIT_WIDTH; col++) {
+            digit[row][col] = val;
+        }
+    }
+}
 
 void printLedArrays() {
     int i, side, cols, col, row, index;
@@ -276,9 +297,21 @@ void printLedArrays() {
         }
     }
 
+    printf("// This table is used to inspect how the led string is layed out as digits\n");
+    printf("//#ifdef INSPECTION\n");
     dumpTable(table, "ledTable");
+    printf("#endif // INSPECTION\n");
+
+    printf("// This table is used display the simulated led table\n");
+    printf("//#ifdef SIMULATED\n");
     dumpTable(tableValues, "ledTableValues");
-    dumpDigitsArray(digits, "ledDigitsArray");
+    printf("#endif // SIMULATED\n");
+
+    printf("// This table is a map of digits to leds\n");
+    printf("//   side1 -  side2  \n");
+    printf("//   00 00 -  00 00  \n");
+    printf("//   AB CD -  EF GH  \n");
+     dumpDigitsArray(digits, "ledDigitsArray");
 
     // verify columns
     cols = SIDES * (2*(DIGIT_WIDTH+DIGIT_WIDTH) + 2*DIGIT_GAP + SCORE_GAP);
@@ -344,6 +377,7 @@ void printNumArrays() {
     setSegments(num8, 1,1,1,1,1,1,1);
     setSegments(num9, 1,1,1,1,0,1,1);
 
+    printf("// This table is a map of nibbles (0-9) to digits, specifically which leds are on/off\n");
     printf("int numArrays[10][ROWS][DIGIT_WIDTH] = {\n");
     dumpNumArray(num0);
     dumpNumArray(num1);
@@ -594,23 +628,24 @@ void updateScores() {
     updateDigit(DIGITA, nibble);
     nibble = score1%10;
     updateDigit(DIGITB, nibble);
-    // nibble = score2/10;
-    // updateDigit(DIGITC, nibble);
-    // nibble = score2%10;
-    // updateDigit(DIGITD, nibble);
-    // nibble = score1/10;
-    // updateDigit(DIGITE, nibble);
-    // nibble = score1%10;
-    // updateDigit(DIGITF, nibble);
-    // nibble = score2/10;
-    // updateDigit(DIGITG, nibble);
-    // nibble = score2%10;
-    // updateDigit(DIGITH, nibble);
+    nibble = score2/10;
+    updateDigit(DIGITC, nibble);
+    nibble = score2%10;
+    updateDigit(DIGITD, nibble);
+    nibble = score1/10;
+    updateDigit(DIGITE, nibble);
+    nibble = score1%10;
+    updateDigit(DIGITF, nibble);
+    nibble = score2/10;
+    updateDigit(DIGITG, nibble);
+    nibble = score2%10;
+    updateDigit(DIGITH, nibble);
 }
 
 void scoresReset() {
     score1 = 0;
     score2 = 0;
+    side1 = 1;
 }
 
 void scoresSide() {
@@ -638,41 +673,60 @@ void scoresMinus() {
 // Main
 ////////////////////////////////////////////////////////////////////////////////
 int main(void) {
+    int i;
 
     printLedArrays();
     printNumArrays();
-    // printLedArraysValues();
 
-    dumpTable(ledTableValues, "ledTableValues");
-
+    // start reset
     scoresReset();
     updateScores();
-    dumpTable(ledTableValues, "ledTableValues");
+    dumpTableOnly(ledTableValues);
 
+    // expect > 01  00
     scoresPlus();
     updateScores();
-    dumpTable(ledTableValues, "ledTableValues");
+    dumpTableOnly(ledTableValues);
 
-    // scoresPlus();
-    // updateScores();
-    // dumpTable(ledTableValues, "ledTableValues");
+    // expect > 02  00
+    scoresPlus();
+    updateScores();
+    dumpTableOnly(ledTableValues);
 
-    // scoresSide();
+    // change side
+    scoresSide();
 
-    // scoresPlus();
-    // updateScores();
-    // dumpTable(ledTableValues, "ledTableValues");
+    // expect   02  01 <
+    scoresPlus();
+    updateScores();
+    dumpTableOnly(ledTableValues);
 
-    // scoresPlus();
-    // updateScores();
-    // dumpTable(ledTableValues, "ledTableValues");
+    // expect   02  02 <
+    scoresPlus();
+    updateScores();
+    dumpTableOnly(ledTableValues);
 
-    // scoresMinus();
-    // updateScores();
-    // dumpTable(ledTableValues, "ledTableValues");
+    // expect   02  01 <
+    scoresMinus();
+    updateScores();
+    dumpTableOnly(ledTableValues);
 
-    // scoresReset();
-    // updateScores();
-    // dumpTable(ledTableValues, "ledTableValues");
+    // test reset
+    // expect > 00  00 
+    scoresReset();
+    updateScores();
+    dumpTableOnly(ledTableValues);
+
+    // expect  > 15  00
+    for (i=0; i<15; i++) scoresPlus();
+    updateScores();
+    dumpTableOnly(ledTableValues);
+
+    // expect    15  23 <
+    scoresSide();
+    for (i=0; i<21; i++) scoresPlus();
+    updateScores();
+    dumpTableOnly(ledTableValues);
+
 }
 
