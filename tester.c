@@ -9,11 +9,13 @@
 
 // This specific file allows quick testing of the scoreboard functionality using
 // a string of LEDs wrappered around a holder, resulting in a 2 sided array of LEDs
-// that will become a scoreboard.  tester.c does some simple operations and simulated
+// that will become a scoreboard.  tester.c does some simple operations and SIMULATION
 // output, via a text output of the LED table.
 
 // To build and run, use the following:
 // rm -f ./runme ; gcc tester.c -o runme ; ./runme
+
+#define SIMULATION
 
 // TODO change to variables for sides
 #define LED_LEVELR 1
@@ -21,11 +23,191 @@
 #define LED_LEVELB 1
 
 /////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 // GENERATED CODE BELOW
 
-this will get replaces
+#define TOP_RIGHT   1
+#define START_LED   0
+#define COLS        30
+#define ROWS        5
+#define SIDES       2
+#define DIGIT_WIDTH 3
+#define DIGIT_GAP   0
+#define SCORE_GAP   3
+#define MAX_SCORE   99
+#define DIGITA      0
+#define DIGITB      1
+#define DIGITC      2
+#define DIGITD      3
+#define DIGITE      4
+#define DIGITF      5
+#define DIGITG      6
+#define DIGITH      7
+#define DIGITS      8
+// This table is used to inspect how the led string is layed out as digits
+#ifdef SIMULATION
+int ledTable[ROWS][COLS] = {
+  {  0,  1,  2,  3,  4,  5, -1, -1, -1,  9, 10, 11, 12, 13, 14,      15, 16, 17, 18, 19, 20, -1, -1, -1, 24, 25, 26, 27, 28, 29},
+  { 30, 31, 32, 33, 34, 35, -1, -1, -1, 39, 40, 41, 42, 43, 44,      45, 46, 47, 48, 49, 50, -1, -1, -1, 54, 55, 56, 57, 58, 59},
+  { 60, 61, 62, 63, 64, 65, -1, -1, -1, 69, 70, 71, 72, 73, 74,      75, 76, 77, 78, 79, 80, -1, -1, -1, 84, 85, 86, 87, 88, 89},
+  { 90, 91, 92, 93, 94, 95, -1, -1, -1, 99,100,101,102,103,104,     105,106,107,108,109,110, -1, -1, -1,114,115,116,117,118,119},
+  {120,121,122,123,124,125, -1, -1, -1,129,130,131,132,133,134,     135,136,137,138,139,140, -1, -1, -1,144,145,146,147,148,149}
+};
+#endif // SIMULATION
+// This table is used display the simulated led table
+#ifdef SIMULATION
+int ledTableValues[ROWS][COLS] = {
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,       0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+};
+#endif // SIMULATION
+// This table is a map of digits to leds
+//   side1 -  side2  
+//   00 00 -  00 00  
+//   AB CD -  EF GH  
+int ledDigitsArray[DIGITS][ROWS][DIGIT_WIDTH] = {
+{
+  {  0,  1,  2 },
+  { 30, 31, 32 },
+  { 60, 61, 62 },
+  { 90, 91, 92 },
+  {120,121,122 }
+},
+{
+  {  3,  4,  5 },
+  { 33, 34, 35 },
+  { 63, 64, 65 },
+  { 93, 94, 95 },
+  {123,124,125 }
+},
+{
+  {  9, 10, 11 },
+  { 39, 40, 41 },
+  { 69, 70, 71 },
+  { 99,100,101 },
+  {129,130,131 }
+},
+{
+  { 12, 13, 14 },
+  { 42, 43, 44 },
+  { 72, 73, 74 },
+  {102,103,104 },
+  {132,133,134 }
+},
+{
+  { 15, 16, 17 },
+  { 45, 46, 47 },
+  { 75, 76, 77 },
+  {105,106,107 },
+  {135,136,137 }
+},
+{
+  { 18, 19, 20 },
+  { 48, 49, 50 },
+  { 78, 79, 80 },
+  {108,109,110 },
+  {138,139,140 }
+},
+{
+  { 24, 25, 26 },
+  { 54, 55, 56 },
+  { 84, 85, 86 },
+  {114,115,116 },
+  {144,145,146 }
+},
+{
+  { 27, 28, 29 },
+  { 57, 58, 59 },
+  { 87, 88, 89 },
+  {117,118,119 },
+  {147,148,149 }
+},
+};
+// This table is a map of nibbles (0-9) to digits, specifically which leds are on/off
+int numArrays[10][ROWS][DIGIT_WIDTH] = {
+{
+  {  1,  1,  1 },
+  {  1,  0,  1 },
+  {  1,  0,  1 },
+  {  1,  0,  1 },
+  {  1,  1,  1 }
+},
+{
+  {  0,  0,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  1,  1,  1 },
+  {  1,  0,  0 },
+  {  1,  1,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  1,  1,  1 }
+},
+{
+  {  1,  0,  1 },
+  {  1,  0,  1 },
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  1,  0,  0 },
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  1,  1,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  1,  0,  0 },
+  {  1,  1,  1 },
+  {  1,  0,  1 },
+  {  1,  1,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 },
+  {  0,  0,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  1,  0,  1 },
+  {  1,  1,  1 },
+  {  1,  0,  1 },
+  {  1,  1,  1 }
+},
+{
+  {  1,  1,  1 },
+  {  1,  0,  1 },
+  {  1,  1,  1 },
+  {  0,  0,  1 },
+  {  1,  1,  1 }
+},
+};
 
 // GENERATED CODE ABOVE
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
 int side1 = 1;
@@ -61,7 +243,7 @@ void updateLed(int position, int value) {
     FastLED.show();
 #endif
 
-#ifdef SIMULATED
+#ifdef SIMULATION
     int row, col;
     for (row=0; row < ROWS; row++) {
         for (col=0; col < COLS; col++) {
@@ -71,7 +253,7 @@ void updateLed(int position, int value) {
             }     
         }
     }
-#endif // SIMULATED
+#endif // SIMULATION
 }
 
 void updateDigit(int digitNum, int nibble) {
@@ -90,7 +272,7 @@ void updateDigit(int digitNum, int nibble) {
 }
 
 void updateScores() {
-#ifdef SIMULATED
+#ifdef SIMULATION
     printf("%s %02d  %02d %s\n", 
     (side1 ? ">" : " "),
     score1,
@@ -147,9 +329,6 @@ void scoresMinus() {
 int main(void) {
     int i;
 
-    printLedArrays();
-    printNumArrays();
-
     // start reset
     scoresReset();
     updateScores();
@@ -199,6 +378,5 @@ int main(void) {
     for (i=0; i<21; i++) scoresPlus();
     updateScores();
     dumpTableOnly(ledTableValues);
-
 }
 

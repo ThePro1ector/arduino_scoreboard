@@ -33,6 +33,28 @@
 #define DIGITS  8
 
 
+void printDefines(FILE *fp) {
+    fprintf(fp, "#define TOP_RIGHT   %d\n", TOP_RIGHT);
+    fprintf(fp, "#define START_LED   %d\n", START_LED);
+    fprintf(fp, "#define COLS        %d\n", COLS);
+    fprintf(fp, "#define ROWS        %d\n", ROWS);
+    fprintf(fp, "#define SIDES       %d\n", SIDES);
+    fprintf(fp, "#define DIGIT_WIDTH %d\n", DIGIT_WIDTH);
+    fprintf(fp, "#define DIGIT_GAP   %d\n", DIGIT_GAP);
+    fprintf(fp, "#define SCORE_GAP   %d\n", SCORE_GAP);
+    fprintf(fp, "#define MAX_SCORE   %d\n", MAX_SCORE);
+    fprintf(fp, "#define DIGITA      %d\n", DIGITA);
+    fprintf(fp, "#define DIGITB      %d\n", DIGITB);
+    fprintf(fp, "#define DIGITC      %d\n", DIGITC);
+    fprintf(fp, "#define DIGITD      %d\n", DIGITD);
+    fprintf(fp, "#define DIGITE      %d\n", DIGITE);
+    fprintf(fp, "#define DIGITF      %d\n", DIGITF);
+    fprintf(fp, "#define DIGITG      %d\n", DIGITG);
+    fprintf(fp, "#define DIGITH      %d\n", DIGITH);
+    fprintf(fp, "#define DIGITS      %d\n", DIGITS);
+}
+
+
 void dumpTable(FILE *fp, int table[ROWS][COLS], char *name) {
     int col, row;
     fprintf(fp, "int %s[ROWS][COLS] = {\n", name);
@@ -282,14 +304,14 @@ void printLedArrays(FILE *fp) {
     }
 
     fprintf(fp, "// This table is used to inspect how the led string is layed out as digits\n");
-    fprintf(fp, "//#ifdef INSPECTION\n");
+    fprintf(fp, "#ifdef SIMULATION\n");
     dumpTable(fp, table, "ledTable");
-    fprintf(fp, "#endif // INSPECTION\n");
+    fprintf(fp, "#endif // SIMULATION\n");
 
     fprintf(fp, "// This table is used display the simulated led table\n");
-    fprintf(fp, "//#ifdef SIMULATED\n");
+    fprintf(fp, "#ifdef SIMULATION\n");
     dumpTable(fp, tableValues, "ledTableValues");
-    fprintf(fp, "#endif // SIMULATED\n");
+    fprintf(fp, "#endif // SIMULATION\n");
 
     fprintf(fp, "// This table is a map of digits to leds\n");
     fprintf(fp, "//   side1 -  side2  \n");
@@ -402,7 +424,8 @@ int main(int argc, char *argv[]) {
     fseek(fp, 0, SEEK_SET);
 
     // allocate buffer
-    buffer = (char *)malloc(fileSize);
+    buffer = (char *)malloc(fileSize+1);
+    memset(buffer, 0, fileSize+1);
     if (!buffer) {
         fclose(fp);
         printf("ERROR: could not allocate buffer to read file.\n");
@@ -431,19 +454,21 @@ int main(int argc, char *argv[]) {
     mark1 += strlen("// GENERATED CODE BELOW\n");
 
     // reopen file to write
-    // fp = fopen(argv[1], "w");
-    // if (!fp) {
-    //     printf("ERROR: could not open '%s' to rewrite.\n", argv[1]);
-    //     exit(1);
-    // }
+    fp = fopen(argv[1], "w");
+    if (!fp) {
+        printf("ERROR: could not open '%s' to rewrite.\n", argv[1]);
+        exit(1);
+    }
 
+    fwrite(buffer, 1, (mark1-buffer), fp);
+    fprintf(fp, "\n");
+    printDefines(fp);
+    printLedArrays(fp);
+    printNumArrays(fp);
+    fprintf(fp, "\n");
+    fwrite(mark2, 1, strlen(mark2), fp);
+    fclose(fp);
 
-    // fclose(fp);
     free(buffer);
-
-    // printLedArrays(fp);
-    // printNumArrays(fp);
-
-
 }
 
