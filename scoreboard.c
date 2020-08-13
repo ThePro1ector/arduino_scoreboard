@@ -11,10 +11,10 @@
 // a holder, resulting in a 2 sided array of LEDs.  Scoring is based on volleyball
 // but can be used for several other sports.  The user can enter commands
 // to change the score:
-//  'r' - reset scores and current side.
-
-// that will become a scoreboard.  tester.c does some simple operations and SIMULATION
-// output, via a text output of the LED table.
+//  r - reset scores
+//  s - side-active change
+//  p - add to side-active score
+//  m - subtract to side-active score
 
 // To build and run, use the following:
 // rm -f ./runme ; gcc scoreboard.c -o runme ; ./runme
@@ -241,11 +241,11 @@ void dumpTableOnly(int table[ROWS][COLS]) {
 
 
 void updateLed(int position, int value) {
+#ifdef ARDUINO
     int R, G, B;
     R = (value ? LED_LEVELR : 0);
     G = (value ? LED_LEVELG : 0);
     B = (value ? LED_LEVELB : 0);
-#ifdef ARDUINO
     leds[position] = CRGB(R, G, B);
     FastLED.show();
 #endif
@@ -371,6 +371,7 @@ void loop() {
         case '?' :
         case 'h' : usage(); break;
     }
+    clearOperation();
     updateScores();
     dumpTableOnly(ledTableValues);
 }

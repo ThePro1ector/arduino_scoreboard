@@ -234,11 +234,11 @@ void dumpTableOnly(int table[ROWS][COLS]) {
 
 
 void updateLed(int position, int value) {
+#ifdef ARDUINO
     int R, G, B;
     R = (value ? LED_LEVELR : 0);
     G = (value ? LED_LEVELG : 0);
     B = (value ? LED_LEVELB : 0);
-#ifdef ARDUINO
     leds[position] = CRGB(R, G, B);
     FastLED.show();
 #endif
