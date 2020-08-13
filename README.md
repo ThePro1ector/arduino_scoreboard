@@ -9,18 +9,27 @@ This project is geared to Volleyball, but should be useable for other scoring.  
 
 Unlike some of the other Arduino based scoreboards, there should be very little physical construction, soldering etc.
 
-The first design will be using a full Arduino UNO and bread as a proof of concept.  Other designs will refine the system, like using a simple Arduino adaptor board to solder buttons, and then move to a less expensive ESP32 (vs UNO) that has more memory, wireless, and bluetooth.  Wireless and bluetooth will be used for experimenting with user configurations.
+The first design will be using a full Arduino UNO and breadboard as a proof of concept.  Other designs will refine the system, like using a simple Arduino adaptor board to solder buttons, and then move to a less expensive ESP32 (vs UNO) that has more memory, wireless, and bluetooth.  Wireless and bluetooth will be used for experimenting with user configurations.
 
 All designs will user the WS2812B LED string, that has individually addressable LEDs and is well supported with the Arduino FastLED library.
 
 Prior to any of the hardware designs, we will create a simple C code simulator that should allow faster prototyping of firmware.
 
 
+## Note about Arduino Development Environment
+This project relies on build and running a helper applications to generate tables of LED position.  We are assuming that the users development system
+has gcc.  If not, then the user will need to figure out how to comple the helper applications.
+
+We have been using a simple Raspberry Pi4 system as an Ardiuno development system.  This is inexpensive and provides a Linux-based operating system.
+
+
 ## C code Simulator
 
-- faster to code and test ideas
-- main loop for c app
-- code with setup() and loop() that can be ported to arduino .ino file
+Seperating code by providing several simple applications:
+- generate.c     - from given LED parameters and desired logical layout, will modifiy a given template with defines and arrays.
+- tester.c       - example template file that implments and does basic testing of a simulated scoreboard
+- scoreboard.c   - 
+- scoreboard.ino - 
 
 
 ## Arduino UNO with breadboard
@@ -77,8 +86,8 @@ https://howtomechatronics.com/tutorials/arduino/how-to-control-ws2812b-individua
 
 ## TODO - C applicaiton
 
-- simple looping, with reset, sideout, plus, minus, and display in text
-- comment mapping for 150 led for a couple different directions
-- create dot matric digits
-- use dot matrix digits for counting
-- port to ino scetch and test
+- generate.c
+    - read settings from config file
+
+- tester.c
+    - change led intesity for current side
