@@ -91,3 +91,5 @@ https://howtomechatronics.com/tutorials/arduino/how-to-control-ws2812b-individua
 
 - tester.c
     - change led intesity for current side
+
+- can this be simpler with include file?  can ardiuno include c-code file?
