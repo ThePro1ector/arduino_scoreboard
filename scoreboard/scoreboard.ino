@@ -1,4 +1,3 @@
-
 #include <FastLED.h>
 
 // This is one of several template application files that can be partially
@@ -16,17 +15,22 @@
 
 // use the following to debug with Serial port
 //#define DEBUG
+//#define SIMULATION
 
 // TODO change to variables for sides
 #define LED_LEVELR 1
 #define LED_LEVELG 1
 #define LED_LEVELB 1
 
+#define LED_PIN     7
 #define NUM_LEDS 150
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
+#ifdef DEBUG
+char printbuffer[120];
+#endif
 
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
@@ -221,7 +225,7 @@ int side1 = 1;
 int score1 = 0;
 int score2 = 0;
 
-#ifdef SIMULATION
+#ifdef DEBUG
 void dumpTableOnly(int table[ROWS][COLS]) {
     int col, row, val;
 
@@ -230,9 +234,11 @@ void dumpTableOnly(int table[ROWS][COLS]) {
             if (col == COLS/2) printf("     ");
             val = table[row][col];
             if (val) {
-                Serial.print("%3d ", table[row][col]);
+                sprintf(printbuffer, "%3d ", table[row][col]);
+                Serial.print(printbuffer);
             } else {
-                Serial.print("%3s ", " ");              
+                sprintf(printbuffer, "%3s ", " ");
+                Serial.print(printbuffer);              
             }
         }
         if ((row+1) < ROWS) Serial.print("\n");
@@ -268,12 +274,13 @@ void updateDigit(int digitNum, int nibble) {
 
 void updateScores() {
 #ifdef DEBUG
-    Serial.print("%s %02d  %02d %s\n", 
+    sprintf(printbuffer, "%s %02d  %02d %s\n",
     (side1 ? ">" : " "),
     score1,
     score2,
     (side1 ? " " : "<")
     );
+    Serial.print(printbuffer);
 #endif
 
     int nibble;
