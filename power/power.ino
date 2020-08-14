@@ -15,19 +15,19 @@
 
 // use the following to debug with Serial port
 #define DEBUG
-#define SIMULATION
+//#define SIMULATION
 
-#define LED_LEVELR_MIN 1
+#define LED_LEVELR_MIN 0
 #define LED_LEVELG_MIN 1
-#define LED_LEVELB_MIN 1
+#define LED_LEVELB_MIN 0
 
-#define LED_LEVELR_MAX 255
-#define LED_LEVELG_MAX 255
-#define LED_LEVELB_MAX 255
+#define LED_LEVELR_MAX 0
+#define LED_LEVELG_MAX 100
+#define LED_LEVELB_MAX 0
 
-#define LED_LEVELR_DELTA 1
-#define LED_LEVELG_DELTA 1
-#define LED_LEVELB_DELTA 1
+#define LED_LEVELR_DELTA 0
+#define LED_LEVELG_DELTA 5
+#define LED_LEVELB_DELTA 0
 
 #define LED_ADJUST_PERIOD 1
 
@@ -250,7 +250,7 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-int ledR = 0;
+int ledR = 1;
 int ledG = 0;
 int ledB = 0;
 
@@ -258,7 +258,7 @@ int side1 = 1;
 int score1 = 0;
 int score2 = 0;
 
-#ifdef DEBUG
+#ifdef SIMULATION
 void dumpTableOnly(int table[ROWS][COLS]) {
     int col, row, val;
 
@@ -278,7 +278,9 @@ void dumpTableOnly(int table[ROWS][COLS]) {
    }
     Serial.print("\n");
 }
+#endif // SIMULATION
 
+#ifdef DEBUG
 void dumpLedLevels() {
   sprintf(printbuffer, "R,G,B: %d, %d, %d\n", ledR, ledG, ledB);
   Serial.print(printbuffer);
@@ -292,7 +294,30 @@ void updateLed(int position, int value) {
     B = (value ? ledB : 0);
     leds[position] = CRGB(R, G, B);
     FastLED.show();
+
+#ifdef SIMULATION
+    //if (value) value = position; 
+    int row, col;
+    for (row=0; row < ROWS; row++) {
+        for (col=0; col < COLS; col++) {
+            if (position == ledTable[row][col]) {
+                ledTableValues[row][col] = value;
+                break;
+            }     
+        }
+    }
+#endif // SIMULATION
+
 }
+
+void clearAllLeds() {
+  int i;
+
+  for (i=0; i<NUM_LEDS; i++) {
+    updateLed(i, 0);
+  }
+}
+
 
 void updateDigit(int digitNum, int nibble) {
     // get pointer to numArrays from nibble, numPtr
@@ -367,12 +392,16 @@ void scoresMinus() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
+#ifdef DEBUG
+    Serial.begin(9600);
+#endif
+    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+    clearAllLeds();
     scoresReset();
     score1 = 88;
     score2 = 88;
     updateScores();
-#ifdef DEBUG
-    Serial.begin(9600);
+#ifdef SIMULATION
     dumpTableOnly(ledTableValues);
 #endif
 }
@@ -384,9 +413,8 @@ void loop() {
       updateScores();
 #ifdef DEBUG
       dumpLedLevels();
-      dumpTableOnly(ledTableValues);
 #endif
-      delay(LED_ADJUST_PERIOD);
+      delay(LED_ADJUST_PERIOD*1000);
 
       ledR += LED_LEVELR_DELTA;
       ledG += LED_LEVELG_DELTA;
