@@ -39,6 +39,27 @@ char printbuffer[120];
 /////////////////////////////////////////////////////////////////
 // GENERATED CODE BELOW
 
+// This following tables and defines were generated based on given inputs
+// reflected in the defines section.  Assuming the LED strip is a WS2812B
+// LED strip with 150 addressable LEDs, these will be 33.33 mm apart:
+// 
+//  |---------o---o   ...   o---o---------|  150 count
+//            <- - - - - - - - ->
+//              5000 mm
+//              16.4 ft
+//            <-->
+//             33.3 mm
+//   <- - - ->
+//     ~150mm
+//
+// When wrapped around a frame 'ROWS' times, with 'COLS' LEDs per row (double side)
+// the frame needs to be approx. 
+// With ROWS = 5 and COLS = 30
+// H = ROWS * 33.3 mm = 166.50mm = 6.56 in
+// W = COLS/2 * 33.3mm - Thickness
+//   assume Thickness at 5mm (leaves some slack) then
+// W = COLS/2 * 33.3mm - 5mm = 494.50mm = 19.47 in
+
 #define TOP_RIGHT   1
 #define START_LED   0
 #define COLS        30

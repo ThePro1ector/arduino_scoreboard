@@ -8,7 +8,7 @@
 // This application accepts a template file and inserts a set of tables
 
 // to build and run, use the following:
-// rm -f ./runme ; gcc generate.c -o runme ; ./runme
+// rm -f ./runme ; gcc generate.c -o runme ; ./runme tester.c
 
 // TODO: read these from a config file
 
@@ -32,6 +32,34 @@
 #define DIGITH  7
 #define DIGITS  8
 
+void printComments(FILE *fp) {
+    float temp1, temp2;
+    fprintf(fp, "// This following tables and defines were generated based on given inputs\n");
+    fprintf(fp, "// reflected in the defines section.  Assuming the LED strip is a WS2812B\n");
+    fprintf(fp, "// LED strip with 150 addressable LEDs, these will be 33.33 mm apart:\n");
+    fprintf(fp, "// \n");
+    fprintf(fp, "//  |---------o---o   ...   o---o---------|  150 count\n");
+    fprintf(fp, "//            <- - - - - - - - ->\n");
+    fprintf(fp, "//              5000 mm\n");
+    fprintf(fp, "//              16.4 ft\n");
+    fprintf(fp, "//            <-->\n");
+    fprintf(fp, "//             33.3 mm\n");
+    fprintf(fp, "//   <- - - ->\n");
+    fprintf(fp, "//     ~150mm\n");
+    fprintf(fp, "//\n");
+    fprintf(fp, "// When wrapped around a frame 'ROWS' times, with 'COLS' LEDs per row (double side)\n");
+    fprintf(fp, "// the frame needs to be approx. \n");
+    fprintf(fp, "// With ROWS = %d and COLS = %d\n", ROWS, COLS);
+    temp1 = ROWS * 33.3;
+    temp2 = temp1 / 25.4;
+    fprintf(fp, "// H = ROWS * 33.3 mm = %.2fmm = %.2f in\n", temp1, temp2);
+    fprintf(fp, "// W = COLS/2 * 33.3mm - Thickness\n");
+    fprintf(fp, "//   assume Thickness at 5mm (leaves some slack) then\n");
+    temp1 = (COLS/2 * 33.3) - 5;
+    temp2 = temp1 / 25.4;
+    fprintf(fp, "// W = COLS/2 * 33.3mm - 5mm = %.2fmm = %.2f in\n", temp1, temp2);
+    fprintf(fp, "\n");
+}
 
 void printDefines(FILE *fp) {
     fprintf(fp, "#define TOP_RIGHT   %d\n", TOP_RIGHT);
@@ -53,7 +81,6 @@ void printDefines(FILE *fp) {
     fprintf(fp, "#define DIGITH      %d\n", DIGITH);
     fprintf(fp, "#define DIGITS      %d\n", DIGITS);
 }
-
 
 void dumpTable(FILE *fp, int table[ROWS][COLS], char *name) {
     int col, row;
@@ -462,6 +489,7 @@ int main(int argc, char *argv[]) {
 
     fwrite(buffer, 1, (mark1-buffer), fp);
     fprintf(fp, "\n");
+    printComments(fp);
     printDefines(fp);
     printLedArrays(fp);
     printNumArrays(fp);

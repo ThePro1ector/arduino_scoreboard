@@ -28,16 +28,41 @@ We have been using a simple Raspberry Pi4 system as an Ardiuno development syste
 Seperating code by providing several simple applications:
 - generate.c     - from given LED parameters and desired logical layout, will modifiy a given template with defines and arrays.
 - tester.c       - example template file that implments and does basic testing of a simulated scoreboard
-- scoreboard.c   - 
-- scoreboard.ino - 
+- scoreboard.c   - example template that implements a simulation of the scoreboard with ascii dump of LEDs
+- scoreboard/scoreboard.ino - Arduino file that is also a template
 
+Each file is already configured with a set of values for 150 count WS2812B LED strip.  If you want to change anything, you can alter the defines in generate.c and re-run with the templates, for example with the tester:
+
+<pre>
+rm -f ./runme
+gcc generate.c -o runme
+./runme tester.c
+rm -f ./runme
+gcc tester.c -o runme
+./runme
+</pre>
+
+If there are configuration problems, like COL not matching expected column count based on other parameters,
+then the tester.c will not compile.
+
+Also note, the generated section of the template, will contain comments describing the size of a physical
+frame that will support this configuratio.
+
+## Physical Frame and LED Strip
+
+TBD
 
 ## Arduino UNO with breadboard
 
+TBD
+
 ## Arduino UNO and Adaptor
+
+TBD
 
 ## ESP32 with breadboard
 
+TBD
 
 ## Rough Notes Below
 
@@ -50,11 +75,6 @@ Seperating code by providing several simple applications:
 
 - TODO: how wire up 5 buttons
 
-- output
-    - string of leds, 150, 5 meters (approx 33.33 mm spacing)
-    - WS2812B allows addressing each and specifiy color/intensity with RGB
-    - wrap around board
-    - define number leds across, number rows, and if double sided 
 
 - get 150 count WS2812B led strip
 - cut connector
@@ -65,23 +85,24 @@ Seperating code by providing several simple applications:
 - gree-pin7
 
 
-### scoreboard.c
-
-This is a simple C program used to more quickly design code changes for the scoreboard.ino file.
 
 
-### scoreboard.ino
+### Reference Links
 
-This is the Arduino scetch code to operate the Arduino UNO
+Base article for controlling WS2812B from an Arduino:<br>
+https://howtomechatronics.com/tutorials/arduino/how-to-control-ws2812b-individually-addressable-leds-using-arduino/
 
+Interesting Idea about WS2812B power consumption:<br>
+https://cpldcpu.wordpress.com/2014/11/16/ws2812_length/
 
-### Links to be reviewed
-
+How to use ESP32 WiFi:<br>
 https://randomnerdtutorials.com/esp32-web-server-arduino-ide/
 
+
+How to use ESP32 WiFi:<br>
 https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#:~:text=One%20of%20the%20greatest%20features,it%20and%20access%20web%20pages.
 
-https://howtomechatronics.com/tutorials/arduino/how-to-control-ws2812b-individually-addressable-leds-using-arduino/
+
 
 
 ## TODO - C applicaiton
@@ -93,3 +114,6 @@ https://howtomechatronics.com/tutorials/arduino/how-to-control-ws2812b-individua
     - change led intesity for current side
 
 - can this be simpler with include file?  can ardiuno include c-code file?
+
+- notes about power limits
+- do experiment/scetch to determine power limit
