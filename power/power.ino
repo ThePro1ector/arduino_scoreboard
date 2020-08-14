@@ -1,26 +1,35 @@
 #include <FastLED.h>
 
-// This is one of several template application files that can be partially
-// updated with tables generated from generate.c.  The inserted defines and tables
-// represent how the LED strip should be logically mapped to tables and digits.
-
-// This specific file implements a simple scoreboard a string of LEDs wrappered around 
-// a holder, resulting in a 2 sided array of LEDs.  Scoring is based on volleyball
-// but can be used for several other sports.  The user can severa buttons
-// to change the score:
-//  TBD - reset scores
-//  TBD - side-active change
-//  TBD - add to side-active score
-//  TBD - subtract to side-active score
+// This template application can be used for testing power consumption test/.ino
+// for the Arduino.
+// From experience, the standard Arduino UNO board cannot support full power on all
+// the LEDs of a WS2812B strip. 
+//
+// The basic idea is to display the worst case score (88 88 88 88) and periodically
+// increase the RGB levels, printing out the values etc. for each step.  At some point
+// the power draw will be so great, it will force a rest of the Arduino.  Not the
+// most elegant method, but avoids alot of electrical theory and math.
+//
+// This specific to the scoreboard functionality, but could be modified for other
+// types of functionality.
 
 // use the following to debug with Serial port
-//#define DEBUG
-//#define SIMULATION
+#define DEBUG
+#define SIMULATION
 
-// TODO change to variables for sides
-#define LED_LEVELR 1
-#define LED_LEVELG 1
-#define LED_LEVELB 1
+#define LED_LEVELR_MIN 1
+#define LED_LEVELG_MIN 1
+#define LED_LEVELB_MIN 1
+
+#define LED_LEVELR_MAX 255
+#define LED_LEVELG_MAX 255
+#define LED_LEVELB_MAX 255
+
+#define LED_LEVELR_DELTA 1
+#define LED_LEVELG_DELTA 1
+#define LED_LEVELB_DELTA 1
+
+#define LED_ADJUST_PERIOD 1
 
 #define LED_PIN     7
 #define NUM_LEDS 150
@@ -241,7 +250,10 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-int operation = ' ';
+int ledR = 0;
+int ledG = 0;
+int ledB = 0;
+
 int side1 = 1;
 int score1 = 0;
 int score2 = 0;
@@ -266,14 +278,18 @@ void dumpTableOnly(int table[ROWS][COLS]) {
    }
     Serial.print("\n");
 }
-#endif
 
+void dumpLedLevels() {
+  sprintf(printbuffer, "R,G,B: %d, %d, %d\n", ledR, ledG, ledB);
+  Serial.print(printbuffer);
+}
+#endif
 
 void updateLed(int position, int value) {
     int R, G, B;
-    R = (value ? LED_LEVELR : 0);
-    G = (value ? LED_LEVELG : 0);
-    B = (value ? LED_LEVELB : 0);
+    R = (value ? ledR : 0);
+    G = (value ? ledG : 0);
+    B = (value ? ledB : 0);
     leds[position] = CRGB(R, G, B);
     FastLED.show();
 }
@@ -345,12 +361,6 @@ void scoresMinus() {
     if (score2 < 0) { score2 = 0; }
 }
 
-void getOperation() {
-  // TODO - read buttons
-    operation = ' ';
-}
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // setup
@@ -358,6 +368,8 @@ void getOperation() {
 
 void setup() {
     scoresReset();
+    score1 = 88;
+    score2 = 88;
     updateScores();
 #ifdef DEBUG
     Serial.begin(9600);
@@ -369,15 +381,17 @@ void setup() {
 // loop
 ////////////////////////////////////////////////////////////////////////////////
 void loop() {
-    getOperation();
-    switch (operation) {
-        case 'r': scoresReset(); break;
-        case 's': scoresSide();  break;
-        case 'p': scoresPlus();  break;
-        case 'm': scoresMinus(); break;
-    }
-    updateScores();
+      updateScores();
 #ifdef DEBUG
-    dumpTableOnly(ledTableValues);
+      dumpLedLevels();
+      dumpTableOnly(ledTableValues);
 #endif
+      delay(LED_ADJUST_PERIOD);
+
+      ledR += LED_LEVELR_DELTA;
+      ledG += LED_LEVELG_DELTA;
+      ledB += LED_LEVELB_DELTA;
+      if (ledR > LED_LEVELR_MAX) ledR = LED_LEVELR_MIN;
+      if (ledG > LED_LEVELG_MAX) ledG = LED_LEVELG_MIN;
+      if (ledB > LED_LEVELB_MAX) ledB = LED_LEVELB_MIN;
 }

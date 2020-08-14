@@ -1,7 +1,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 // This is one of several template application files that can be partially
 // updated with tables generated from generate.c.  The inserted defines and tables

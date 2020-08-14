@@ -48,6 +48,21 @@ then the tester.c will not compile.
 Also note, the generated section of the template, will contain comments describing the size of a physical
 frame that will support this configuratio.
 
+## Dealing with power limits
+
+Before building the frame and starting up the scoreboard Arduino sketch, we need to address a power limit that
+is possible with the WS2812B.  It is convienent to just use the 5V supply of the Arduino UNO board to drive the
+LED strip.  Unfortunately, we discovered that we cannot drive all 150 LEDs at once, even with a single color.
+From observation, the limit seems to be around 80 LEDs, then the Arudino UNO resets the system.  This can be
+difficult to debug, so finding the limit is important.
+
+NOTE: Be aware that with the Arduino UNO resetting, it can be difficult to reload a new Arduino sketch.  We found
+that it may require restarting/reconnecting the Arduino and some timing to reload code.
+
+The applications power.c and power.ino can be used to experiment with your own system to find these limits.
+The power.c is a simulation to help build changes to power.ino.
+
+
 ## Physical Frame and LED Strip
 
 TBD
@@ -107,13 +122,13 @@ https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#:~:text=O
 
 ## TODO - C applicaiton
 
-- generate.c
-    - read settings from config file
+- finsh README.md
+- implement button hardware and .ino code to drive operation for scoreboard.ino
+- implement side identification using led intensity of scorebaord.ino
+- read settings from generate.config for generate.c
+- how to share similar scoreboard display and operation code
+- add other functionality like:
+    - pomodora clock
+    - running clock
+    - other?
 
-- tester.c
-    - change led intesity for current side
-
-- can this be simpler with include file?  can ardiuno include c-code file?
-
-- notes about power limits
-- do experiment/scetch to determine power limit
