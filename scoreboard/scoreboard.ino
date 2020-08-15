@@ -248,44 +248,24 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
+const int buttonPinSide = 2;
+const int buttonPinPlus = 3;
+const int buttonPinMinus = 4;
+
+#define BUTTONSTATE_THREASHOLD 10
+int buttonState = 0;
+int buttonStateSide = 0;
+int buttonStatePlus = 0;
+int buttonStateMinus = 0;
+
 int ledR = LED_LEVELR;
 int ledG = LED_LEVELG;
 int ledB = LED_LEVELB;
-
 
 int operation = ' ';
 int side1 = 1;
 int score1 = 0;
 int score2 = 0;
-
-#ifdef SIMULATION
-void dumpTableOnly(int table[ROWS][COLS]) {
-    int col, row, val;
-
-    for (row = 0; row < ROWS; row++) {
-        for (col = 0; col < COLS; col++) {
-            if (col == COLS/2) printf("     ");
-            val = table[row][col];
-            if (val) {
-                sprintf(printbuffer, "%3d ", table[row][col]);
-                Serial.print(printbuffer);
-            } else {
-                sprintf(printbuffer, "%3s ", " ");
-                Serial.print(printbuffer);              
-            }
-        }
-        if ((row+1) < ROWS) Serial.print("\n");
-   }
-    Serial.print("\n");
-}
-#endif // SIMULATION
-
-#ifdef DEBUG
-void dumpLedLevels() {
-  sprintf(printbuffer, "R,G,B: %d, %d, %d\n", ledR, ledG, ledB);
-  Serial.print(printbuffer);
-}
-#endif
 
 void updateLed(int position, int value) {
     int R, G, B;
@@ -294,20 +274,6 @@ void updateLed(int position, int value) {
     B = (value ? ledB : 0);
     leds[position] = CRGB(R, G, B);
     FastLED.show();
-
-#ifdef SIMULATION
-    //if (value) value = position; 
-    int row, col;
-    for (row=0; row < ROWS; row++) {
-        for (col=0; col < COLS; col++) {
-            if (position == ledTable[row][col]) {
-                ledTableValues[row][col] = value;
-                break;
-            }     
-        }
-    }
-#endif // SIMULATION
-
 }
 
 void clearAllLeds() {
@@ -317,7 +283,6 @@ void clearAllLeds() {
     updateLed(i, 0);
   }
 }
-
 
 void updateDigit(int digitNum, int nibble) {
     // get pointer to numArrays from nibble, numPtr
@@ -389,6 +354,29 @@ void scoresMinus() {
 void getOperation() {
   // TODO - read buttons
     operation = ' ';
+
+
+int buttonStateSide = 0;
+int buttonStatePlus = 0;
+int buttonStateMinus = 0;
+
+
+
+  buttonState = digitalRead(buttonPinSide);
+  if (buttonState) buttonStateSide++;
+  else             buttonStateSide = 0;
+
+  buttonState = digitalRead(buttonPinPlus);
+  if (buttonState) buttonStatePlus++;
+  else             buttonStatePlus = 0;
+
+  buttonState = digitalRead(buttonPinMinus);
+  if (buttonState) buttonPinMinus++;
+  else             buttonPinMinus = 0;
+
+  if (buttonStateSide > BUTTONSTATE_THREASHOLD)  { operation = 's'; return; }
+  if (buttonStatePlus > BUTTONSTATE_THREASHOLD)  { operation = 'p'; return; }
+  if (buttonStateMinus > BUTTONSTATE_THREASHOLD) { operation = 'm'; return; }
 }
 
 
@@ -401,13 +389,15 @@ void setup() {
 #ifdef DEBUG
     Serial.begin(9600);
 #endif
+
+    pinMode(buttonPinSide, INPUT);
+    pinMode(buttonPinPlus, INPUT);
+    pinMode(buttonPinMinus, INPUT);
+
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
     clearAllLeds();
     scoresReset();
     updateScores();
-#ifdef SIMULATION
-    dumpTableOnly(ledTableValues);
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -422,7 +412,4 @@ void loop() {
         case 'm': scoresMinus(); break;
     }
     updateScores();
-#ifdef DEBUG
-    dumpTableOnly(ledTableValues);
-#endif
 }
