@@ -17,7 +17,14 @@
 //#define DEBUG
 //#define SIMULATION
 
-// TODO change to variables for sides
+#define LED_LEVELR_MIN 0
+#define LED_LEVELG_MIN 1
+#define LED_LEVELB_MIN 0
+
+#define LED_LEVELR_MAX 0
+#define LED_LEVELG_MAX 100
+#define LED_LEVELB_MAX 0
+
 #define LED_LEVELR 1
 #define LED_LEVELG 1
 #define LED_LEVELB 1
@@ -241,12 +248,17 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
+int ledR = LED_LEVELR;
+int ledG = LED_LEVELG;
+int ledB = LED_LEVELB;
+
+
 int operation = ' ';
 int side1 = 1;
 int score1 = 0;
 int score2 = 0;
 
-#ifdef DEBUG
+#ifdef SIMULATION
 void dumpTableOnly(int table[ROWS][COLS]) {
     int col, row, val;
 
@@ -266,17 +278,46 @@ void dumpTableOnly(int table[ROWS][COLS]) {
    }
     Serial.print("\n");
 }
-#endif
+#endif // SIMULATION
 
+#ifdef DEBUG
+void dumpLedLevels() {
+  sprintf(printbuffer, "R,G,B: %d, %d, %d\n", ledR, ledG, ledB);
+  Serial.print(printbuffer);
+}
+#endif
 
 void updateLed(int position, int value) {
     int R, G, B;
-    R = (value ? LED_LEVELR : 0);
-    G = (value ? LED_LEVELG : 0);
-    B = (value ? LED_LEVELB : 0);
+    R = (value ? ledR : 0);
+    G = (value ? ledG : 0);
+    B = (value ? ledB : 0);
     leds[position] = CRGB(R, G, B);
     FastLED.show();
+
+#ifdef SIMULATION
+    //if (value) value = position; 
+    int row, col;
+    for (row=0; row < ROWS; row++) {
+        for (col=0; col < COLS; col++) {
+            if (position == ledTable[row][col]) {
+                ledTableValues[row][col] = value;
+                break;
+            }     
+        }
+    }
+#endif // SIMULATION
+
 }
+
+void clearAllLeds() {
+  int i;
+
+  for (i=0; i<NUM_LEDS; i++) {
+    updateLed(i, 0);
+  }
+}
+
 
 void updateDigit(int digitNum, int nibble) {
     // get pointer to numArrays from nibble, numPtr
@@ -357,10 +398,14 @@ void getOperation() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
-    scoresReset();
-    updateScores();
 #ifdef DEBUG
     Serial.begin(9600);
+#endif
+    FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+    clearAllLeds();
+    scoresReset();
+    updateScores();
+#ifdef SIMULATION
     dumpTableOnly(ledTableValues);
 #endif
 }
