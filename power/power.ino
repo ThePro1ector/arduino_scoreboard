@@ -10,6 +10,12 @@
 // the power draw will be so great, it will force a rest of the Arduino.  Not the
 // most elegant method, but avoids alot of electrical theory and math.
 //
+// Reset symptom is that Arduino IDE can no longer access download device.
+//
+// If board resets, unplug both 5V power and USB.  Re-plug 5V, then USB, then reload code.
+// There is a bit of a race condition...you need to reload from Arduino IDE before system
+// resets again.
+//
 // This specific to the scoreboard functionality, but could be modified for other
 // types of functionality.
 
@@ -17,21 +23,39 @@
 #define DEBUG
 //#define SIMULATION
 
+// TEST1 - max of white
+// 50 good
+// 60 bad
+// 70 bad
+// TEST2 - max of red
+// 150 bad
+// 90  bad
+// 85  bad
+// 80  maybe
+// 50  good
+// TEST3 - max of green
+// 150 bad
+// 90  bad
+// 80  maybe
+// 50  good
+// TEST4 - max of blue
+// 50  good
+
 #define LED_LEVELR_MIN 0
-#define LED_LEVELG_MIN 1
+#define LED_LEVELG_MIN 0
 #define LED_LEVELB_MIN 0
 
 #define LED_LEVELR_MAX 0
-#define LED_LEVELG_MAX 100
-#define LED_LEVELB_MAX 0
+#define LED_LEVELG_MAX 0
+#define LED_LEVELB_MAX 50
 
 #define LED_LEVELR_DELTA 0
-#define LED_LEVELG_DELTA 5
-#define LED_LEVELB_DELTA 0
+#define LED_LEVELG_DELTA 0
+#define LED_LEVELB_DELTA 5
 
-#define LED_ADJUST_PERIOD 1
+#define LED_ADJUST_PERIOD 4
 
-#define LED_PIN     7
+#define LED_PIN  7
 #define NUM_LEDS 150
 
 // Define the array of leds
@@ -250,9 +274,9 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-int ledR = 1;
-int ledG = 0;
-int ledB = 0;
+int ledR = LED_LEVELR_MIN;
+int ledG = LED_LEVELG_MIN;
+int ledB = LED_LEVELB_MIN;
 
 int side1 = 1;
 int score1 = 0;
@@ -394,6 +418,7 @@ void scoresMinus() {
 void setup() {
 #ifdef DEBUG
     Serial.begin(9600);
+    Serial.print("RESET\n");
 #endif
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
     clearAllLeds();

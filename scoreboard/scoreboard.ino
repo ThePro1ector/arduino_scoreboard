@@ -14,7 +14,7 @@
 //  TBD - subtract to side-active score
 
 // use the following to debug with Serial port
-//#define DEBUG
+#define DEBUG
 //#define SIMULATION
 
 #define LED_LEVELR_MIN 0
@@ -29,7 +29,7 @@
 #define LED_LEVELG 1
 #define LED_LEVELB 1
 
-#define LED_PIN     7
+#define LED_PIN  7
 #define NUM_LEDS 150
 
 // Define the array of leds
@@ -248,11 +248,11 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-const int buttonPinSide = 2;
-const int buttonPinPlus = 3;
-const int buttonPinMinus = 4;
+const int buttonPinSide = 4;
+const int buttonPinPlus = 2;
+const int buttonPinMinus = 3;
 
-#define BUTTONSTATE_THREASHOLD 10
+#define BUTTONSTATE_THREASHOLD 1
 int buttonState = 0;
 int buttonStateSide = 0;
 int buttonStatePlus = 0;
@@ -300,7 +300,7 @@ void updateDigit(int digitNum, int nibble) {
 }
 
 void updateScores() {
-#ifdef DEBUG
+#ifdef DEBUG2
     sprintf(printbuffer, "%s %02d  %02d %s\n",
     (side1 ? ">" : " "),
     score1,
@@ -355,14 +355,10 @@ void getOperation() {
   // TODO - read buttons
     operation = ' ';
 
-
-int buttonStateSide = 0;
-int buttonStatePlus = 0;
-int buttonStateMinus = 0;
-
-
-
+  Serial.print("getOperation\n");
   buttonState = digitalRead(buttonPinSide);
+  sprintf(printbuffer, "%d\n",buttonState);
+  Serial.print(printbuffer);
   if (buttonState) buttonStateSide++;
   else             buttonStateSide = 0;
 
@@ -371,9 +367,9 @@ int buttonStateMinus = 0;
   else             buttonStatePlus = 0;
 
   buttonState = digitalRead(buttonPinMinus);
-  if (buttonState) buttonPinMinus++;
-  else             buttonPinMinus = 0;
-
+  if (buttonState) buttonStateMinus++;
+  else             buttonStateMinus = 0;
+operation = 'p'; return;
   if (buttonStateSide > BUTTONSTATE_THREASHOLD)  { operation = 's'; return; }
   if (buttonStatePlus > BUTTONSTATE_THREASHOLD)  { operation = 'p'; return; }
   if (buttonStateMinus > BUTTONSTATE_THREASHOLD) { operation = 'm'; return; }
