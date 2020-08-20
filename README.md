@@ -132,6 +132,9 @@ https://lastminuteengineers.com/creating-esp32-web-server-arduino-ide/#:~:text=O
 Arduino Button Tutorial<br>
 https://www.arduino.cc/en/tutorial/button
 
+Ardiuno Interupt Buttons:<br>
+https://create.arduino.cc/projecthub/Svizel_pritula/10-buttons-using-1-interrupt-2bd1f8
+
 
 ## TODO - C applicaiton
 
