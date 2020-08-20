@@ -248,15 +248,12 @@ int numArrays[10][ROWS][DIGIT_WIDTH] = {
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-const int buttonPinSide = 4;
-const int buttonPinPlus = 2;
-const int buttonPinMinus = 3;
-
-#define BUTTONSTATE_THREASHOLD 1
-int buttonState = 0;
-int buttonStateSide = 0;
-int buttonStatePlus = 0;
-int buttonStateMinus = 0;
+#define BUTTON_PLUS  0
+#define BUTTON_MINUS 1
+#define BUTTON_SIDE  2
+const int commonPin = 2;
+const int buttonPins[] = {3,4,5};
+unsigned long lastFire = 0;
 
 int ledR = LED_LEVELR;
 int ledG = LED_LEVELG;
@@ -351,44 +348,60 @@ void scoresMinus() {
     if (score2 < 0) { score2 = 0; }
 }
 
-void getOperation() {
-  // TODO - read buttons
-    operation = ' ';
+void pressInterrupt() { // ISR
+  if (millis() - lastFire < 400) { // Debounce
+    return;
+  }
+  lastFire = millis();
 
-  Serial.print("getOperation\n");
-  buttonState = digitalRead(buttonPinSide);
-  sprintf(printbuffer, "%d\n",buttonState);
-  Serial.print(printbuffer);
-  if (buttonState) buttonStateSide++;
-  else             buttonStateSide = 0;
+  configureDistinct(); // Setup pins for testing individual buttons
 
-  buttonState = digitalRead(buttonPinPlus);
-  if (buttonState) buttonStatePlus++;
-  else             buttonStatePlus = 0;
+  for (int i = 0; i < sizeof(buttonPins) / sizeof(int); i++) { // Test each button for press
+    if (!digitalRead(buttonPins[i])) {
+      press(i);
+    }
+  }
 
-  buttonState = digitalRead(buttonPinMinus);
-  if (buttonState) buttonStateMinus++;
-  else             buttonStateMinus = 0;
-operation = 'p'; return;
-  if (buttonStateSide > BUTTONSTATE_THREASHOLD)  { operation = 's'; return; }
-  if (buttonStatePlus > BUTTONSTATE_THREASHOLD)  { operation = 'p'; return; }
-  if (buttonStateMinus > BUTTONSTATE_THREASHOLD) { operation = 'm'; return; }
+  configureCommon(); // Return to original state
 }
 
+void configureCommon() {
+  pinMode(commonPin, INPUT_PULLUP);
+
+  for (int i = 0; i < sizeof(buttonPins) / sizeof(int); i++) {
+    pinMode(buttonPins[i], OUTPUT);
+    digitalWrite(buttonPins[i], LOW);
+  }
+}
+
+void configureDistinct() {
+  pinMode(commonPin, OUTPUT);
+  digitalWrite(commonPin, LOW);
+
+  for (int i = 0; i < sizeof(buttonPins) / sizeof(int); i++) {
+    pinMode(buttonPins[i], INPUT_PULLUP);
+  }
+}
+
+void press(int button) { // Our handler
+  switch(button) {
+    case BUTTON_PLUS:  operation = 'p'; break;
+    case BUTTON_MINUS: operation = 'm'; break;
+    case BUTTON_SIDE:  operation = 's'; break;
+  }
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // setup
 ////////////////////////////////////////////////////////////////////////////////
-
 void setup() {
 #ifdef DEBUG
     Serial.begin(9600);
 #endif
 
-    pinMode(buttonPinSide, INPUT);
-    pinMode(buttonPinPlus, INPUT);
-    pinMode(buttonPinMinus, INPUT);
+    configureCommon(); // Setup pins for interrupt
+    attachInterrupt(digitalPinToInterrupt(commonPin), pressInterrupt, FALLING);
 
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
     clearAllLeds();
@@ -400,12 +413,12 @@ void setup() {
 // loop
 ////////////////////////////////////////////////////////////////////////////////
 void loop() {
-    getOperation();
     switch (operation) {
         case 'r': scoresReset(); break;
         case 's': scoresSide();  break;
         case 'p': scoresPlus();  break;
         case 'm': scoresMinus(); break;
     }
+    operation = ' ';
     updateScores();
 }
