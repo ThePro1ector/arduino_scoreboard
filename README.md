@@ -2,6 +2,8 @@
 
 <b style="color:red">***WORK IN PROGRESS***</b>
 
+***Due to othe commitments, this work has been put on hold.  Current ino file can run a simple setup with buttons, but the button debounce and led response needs work.  - 9/14/2020***
+
 
 
 ## Background
